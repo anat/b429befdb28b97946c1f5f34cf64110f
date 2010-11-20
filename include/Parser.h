@@ -11,7 +11,7 @@ class Parser
 private:
 	std::ifstream	_ifs;
 	int				_size;
-
+	int**			_state;
 public:
 	Parser(std::string const &);
 	~Parser(void);

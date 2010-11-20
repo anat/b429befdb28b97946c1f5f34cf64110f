@@ -3,12 +3,14 @@
 #include <iostream>
 #include <list>
 
-Parser::Parser(std::string const & file) : _ifs(file.c_str()), _size(0)
+Parser::Parser(std::string const & file) : _ifs(file.c_str()), _size(0), 	_state(0)
 {
 }
 
 int** Parser::getInitialState()
 {
+	if (_state)
+		return _state;
 	std::string line;
 
 	// Get Size of "Taquin"
@@ -17,8 +19,10 @@ int** Parser::getInitialState()
 	lineSize >> _size;
 
 	if (_size == 0)
+	{
+		std::cerr << "Bad \"Taquin\" file" << std::endl;
 		return 0;
-
+	}
 	int** base = new int*[_size];
 	for (int i = 0 ; i < _size ; i++)
 		base[i] = new int[_size];
