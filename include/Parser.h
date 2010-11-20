@@ -18,7 +18,6 @@ public:
 	int** getInitialState();
 	bool validateState(int ** base);
 	int getSize();
-	bool hasSolution(int **base);
 };
 
 #endif

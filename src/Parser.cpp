@@ -81,20 +81,11 @@ bool Parser::validateState(int ** base)
 	if (elements.size() != (_size * _size))
 		err = true;
 
-	if (!this->hasSolution(base))
-		err = true;
-
 	if (err)
 	{
 		std::cerr << "Error in given numbers" << std::endl;
 		return false;
 	}
-	return true;
-}
-
-bool Parser::hasSolution(int **base)
-{
-
 	return true;
 }
 
