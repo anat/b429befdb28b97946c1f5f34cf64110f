@@ -5,12 +5,14 @@
 
 Parser::Parser(std::string const & file) : _ifs(file.c_str()), _size(0), 	_state(0)
 {
+	if ((_state = readInitialState()))
+	{
+		std::cout << "Good \"Taquin\" File of " << _size << std::endl;
+	}
 }
 
-int** Parser::getInitialState()
+int** Parser::readInitialState()
 {
-	if (_state)
-		return _state;
 	std::string line;
 
 	// Get Size of "Taquin"
@@ -79,6 +81,7 @@ bool Parser::validateState(int ** base)
 	if (*(elements.begin()) != (_size * _size) - 1)
 		err = true;
 
+	std::cout << err << std::endl;
 	// Check if there's no doubled values
 	elements.unique();
 
@@ -91,6 +94,11 @@ bool Parser::validateState(int ** base)
 		return false;
 	}
 	return true;
+}
+
+int** Parser::getInitialState()
+{
+	return _state;
 }
 
 

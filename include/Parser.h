@@ -15,6 +15,7 @@ private:
 public:
 	Parser(std::string const &);
 	~Parser(void);
+	int** readInitialState();
 	int** getInitialState();
 	bool validateState(int ** base);
 	int getSize();

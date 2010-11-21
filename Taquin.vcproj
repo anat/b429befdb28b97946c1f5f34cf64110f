@@ -163,7 +163,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\src\AStar.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\main.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\Node.cpp"
 				>
 			</File>
 			<File
@@ -176,6 +184,14 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\include\AStar.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\Node.h"
+				>
+			</File>
 			<File
 				RelativePath=".\include\Parser.h"
 				>
