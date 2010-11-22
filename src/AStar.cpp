@@ -1,10 +1,20 @@
 #include "AStar.h"
-#include <iostream>
-#include <time.h>
+# include <iostream>
+# include <fstream>
+#ifdef _WIN32
+# include "Windows.h"
+#else
+# include <time.h>
+#endif
+
 
 AStar::AStar(int size, int** initialState) : _matrixHelper(0), _solution(0)
 {
+#ifdef _WIN32
+	_startTime = GetTickCount();
+#else
 	_startTime = time(0);
+#endif
 	_size = size;
 	Node* n = new Node();
 	n->State = initialState;
@@ -21,8 +31,9 @@ AStar::~AStar(void)
 }
 
 
-void AStar::run()
+void AStar::run(char const * file)
 {
+	_file = file;
 	// Add the start to the open list
 	_openList.push_back(_initialState);
 	getPossibleMove(_initialState);
@@ -80,13 +91,37 @@ void AStar::getBestNode(std::list<Node*>::iterator & current)
 		{
 			int i = 0;
 			Node * n = (*it);
+#ifdef _WIN32
+			std::cout << (GetTickCount() - _startTime) << " millisecondes" << std::endl;
+#else
 			std::cout << (time(0) - _startTime) << " secondes" << std::endl;
+#endif
+			std::string outputfile(_file + std::string(".solution"));
+			std::ofstream ofs(outputfile.c_str());
+			#ifdef _WIN32
+			ofs << "Compute time : " << (GetTickCount() - _startTime) << " Milliseconds" << std::endl;
+#else
+			ofs << "Compute time : " << (time(0) - _startTime) << " seconds" << std::endl;
+#endif
+			std::list<const char *> solution;
 			while (n->Parent != 0)
 			{
 				std::cout << n->getDirByEnum() << std::endl;
+				solution.push_front(n->getDirByEnum());
 				n = n->Parent;
 				i++;
 			}
+			
+			
+			std::list<const char *>::const_iterator it = solution.begin();
+			std::list<const char *>::const_iterator end = solution.end();
+
+			for (; it != end ; ++it)
+			{
+				ofs << (*it) << std::endl;
+			}
+			ofs.close();
+
 			std::cout << "FOUND en " << i << " coups" << std::endl;
 			system("pause");
 			this->showClosedList();
@@ -101,8 +136,6 @@ void AStar::getBestNode(std::list<Node*>::iterator & current)
 	}
 	//std::cout << "Plus petit : " << save << std::endl;
 }
-
-
 
 void AStar::getPossibleMove(Node * n)
 {
@@ -189,7 +222,6 @@ void AStar::showClosedList()
 
 Node* AStar::getSolution()
 {
-
 	if (_solution)
 		return _solution;
 

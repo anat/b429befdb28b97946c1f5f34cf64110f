@@ -6,6 +6,12 @@
 #include "IHeuristic.h"
 #include "Manhattan.h"
 
+#ifdef _WIN32
+#include "Windows.h"
+#else
+#include "time.h"
+#endif
+
 class AStar
 {
 private:
@@ -15,13 +21,20 @@ private:
 	std::list<Node*> _openList;
 	std::list<Node*> _closedList;
 	int** _matrixHelper;
+	char const * _file;
+#ifdef _WIN32
+	DWORD _startTime;
+#else
 	time_t _startTime;
+#endif
+
 	IHeuristic* _heuristic;
+
 public:
 	AStar(int size, int** initialState);
 	void getPossibleMove(Node * n);
 	~AStar(void);
-	void run();
+	void run(char const * file);
 	int getMatrixValue(int y, int x);
 	Node* getSolution();
 	int** fillMatrix();

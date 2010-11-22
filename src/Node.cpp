@@ -38,6 +38,7 @@ void Node::setBlank()
 			{
 				this->BlankX = i;
 				this->BlankY = j;
+				return;
 			}
 		}
 	}
@@ -55,6 +56,7 @@ char const * Node::getDirByEnum()
 		return "Down";
 	return "None";
 }
+
 void Node::show()
 {
 	std::cout << "-----------Node-------------------------------" << std::endl;
