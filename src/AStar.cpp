@@ -26,15 +26,11 @@ void AStar::run()
 	// Add the start to the open list
 	_openList.push_back(_initialState);
 	getPossibleMove(_initialState);
-	//showOpenList();
-	//exit(0);
-
 	_closedList.splice(_closedList.begin(), _openList, _openList.begin());
 
 
 	std::list<Node*>::iterator current;
 	current = _openList.begin();
-
 	while (1)
 	{
 		//if (_openList.size() % 1000 == 0)
@@ -120,7 +116,6 @@ void AStar::getPossibleMove(Node * n)
 			newNode->Parent = n;
 			newNode->Direction = Down;
 			newNode->BlankX = n->BlankX - 1;
-			//newNode->H = Node::ManhattanHeuristic(newNode->State,_solution->State, _size);
 			newNode->H = _heuristic->getH(newNode);
 			_openList.push_back(newNode);
 		}
@@ -138,7 +133,6 @@ void AStar::getPossibleMove(Node * n)
 			newNode->Parent = n;
 			newNode->Direction = Up;
 			newNode->BlankX = n->BlankX + 1;
-			//newNode->H = Node::ManhattanHeuristic(newNode->State,_solution->State, _size);
 			newNode->H = _heuristic->getH(newNode);
 			_openList.push_back(newNode);
 		}
@@ -153,7 +147,6 @@ void AStar::getPossibleMove(Node * n)
 			newNode->Parent = n;
 			newNode->Direction = Right;
 			newNode->BlankY = n->BlankY - 1;
-			//newNode->H = Node::ManhattanHeuristic(newNode->State,_solution->State, _size);
 			newNode->H = _heuristic->getH(newNode);
 			_openList.push_back(newNode);
 		}
@@ -168,7 +161,6 @@ void AStar::getPossibleMove(Node * n)
 			newNode->Parent = n;
 			newNode->Direction = Left;
 			newNode->BlankY = n->BlankY + 1;
-			//newNode->H = Node::ManhattanHeuristic(newNode->State,_solution->State, _size);
 			newNode->H = _heuristic->getH(newNode);
 			_openList.push_back(newNode);
 		}
