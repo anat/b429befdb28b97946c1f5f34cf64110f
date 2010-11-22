@@ -171,6 +171,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Manhattan.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\Node.cpp"
 				>
 			</File>
@@ -186,6 +190,14 @@
 			>
 			<File
 				RelativePath=".\include\AStar.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\IHeuristic.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\Manhattan.h"
 				>
 			</File>
 			<File

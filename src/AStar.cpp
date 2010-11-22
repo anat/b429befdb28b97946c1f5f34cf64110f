@@ -1,15 +1,19 @@
 #include "AStar.h"
 #include <iostream>
+#include <time.h>
 
 AStar::AStar(int size, int** initialState) : _matrixHelper(0), _solution(0)
 {
+	_startTime = time(0);
 	_size = size;
 	Node* n = new Node();
 	n->State = initialState;
 	n->Size = size;
+	n->setBlank();
 	_initialState = n;
 	_solution = getSolution();
-	showNode(_solution);
+	_heuristic = new Manhattan(_solution);
+	//_solution->show();
 }
 
 AStar::~AStar(void)
@@ -22,7 +26,8 @@ void AStar::run()
 	// Add the start to the open list
 	_openList.push_back(_initialState);
 	getPossibleMove(_initialState);
-
+	//showOpenList();
+	//exit(0);
 
 	_closedList.splice(_closedList.begin(), _openList, _openList.begin());
 
@@ -30,36 +35,37 @@ void AStar::run()
 	std::list<Node*>::iterator current;
 	current = _openList.begin();
 
-	while (!isInClosedList(current))
+	while (1)
 	{
-		std::cout << "Taille de la openList " << std::dec <<  _openList.size() << std::endl;
-		std::cout << "Taille de la closedList " << std::dec <<  _closedList.size() << std::endl;
+		//if (_openList.size() % 1000 == 0)
+		//std::cout << "Taille de la openList " << std::dec <<  _openList.size() << std::endl;
 
-		if (_openList.size() == 0)
-		{
-			std::cout << "No solution" << std::endl;
-		}
-		else
-		{
-			// get The most interesting node
-			getBestNode(current);
-			// get All new possible moves
-			getPossibleMove((*current));
-			// Move the CostLess Node to closedList
-			_closedList.splice(_closedList.begin(), _openList, current);
-			// Ici on a baisé le pointeur 
-			current = _closedList.begin();
-		}
+		//if (_closedList.size() % 1000 == 0)
+		//std::cout << "Taille de la closedList " << std::dec <<  _closedList.size() << std::endl;
+
+		//if (_openList.size() == 0)
+		//{
+		//	std::cout << "No solution" << std::endl;
+		//}
+		//else
+		//{
+		// get The most interesting node
+		getBestNode(current);
+		// get All new possible moves
+		getPossibleMove((*current));
+		// Move the CostLess Node to closedList
+		_closedList.splice(_closedList.begin(), _openList, current);
+		//}
 	}
 }
 
-bool AStar::isInClosedList(std::list<Node*>::iterator check)
+bool AStar::isInClosedList(Node* n)
 {
 	if (_closedList.size() == 0)
 		return false;
 	std::list<Node*>::iterator itclosed = _closedList.begin();
 	std::list<Node*>::iterator endclosed = _closedList.end();
-	while (itclosed != endclosed && Node::Equals((*check),_solution) == false)
+	while (itclosed != endclosed && Node::Equals((*itclosed), n) == false)
 		itclosed++;
 	if (itclosed != endclosed)
 		return true;
@@ -76,14 +82,18 @@ void AStar::getBestNode(std::list<Node*>::iterator & current)
 	{
 		if ((*it)->H == 0)
 		{
-			std::cout << "FOUND en " << _closedList.size() << " coups" << std::endl;
-
-			std::cout << "closed :" << std::endl;
-			std::list<Node*>::iterator itclosed = _closedList.begin();
-			std::list<Node*>::iterator endclosed = _closedList.end();
-			while (itclosed != endclosed)
-				showNode(*(itclosed++));
-
+			int i = 0;
+			Node * n = (*it);
+			std::cout << (time(0) - _startTime) << " secondes" << std::endl;
+			while (n->Parent != 0)
+			{
+				std::cout << n->getDirByEnum() << std::endl;
+				n = n->Parent;
+				i++;
+			}
+			std::cout << "FOUND en " << i << " coups" << std::endl;
+			system("pause");
+			this->showClosedList();
 			exit(0);
 		}
 		else if ((*it)->H < save)
@@ -93,80 +103,97 @@ void AStar::getBestNode(std::list<Node*>::iterator & current)
 			save = (*it)->H;
 		}
 	}
-	std::cout << "Plus petit : " << save << std::endl;
+	//std::cout << "Plus petit : " << save << std::endl;
 }
 
 
 
 void AStar::getPossibleMove(Node * n)
 {
-	for (int i = 0 ; i < _size ; i++)
+	if (n->BlankX != 0 && n->Direction != Up)
 	{
-		for (int j = 0 ; j < _size ; j++)
+		Node * newNode = new Node(*n);
+		if (!isInClosedList(newNode))
 		{
-			if (n->State[i][j] == BLANK)
-			{
-				if (i != 0)
-				{
-					Node * newNode = new Node(*n);
-					newNode->State[i][j] = n->State[i - 1][j];
-					newNode->State[i - 1][j] = 0;
-					newNode->Parent = n;
+			newNode->State[n->BlankX][n->BlankY] = n->State[n->BlankX - 1][n->BlankY];
+			newNode->State[n->BlankX - 1][n->BlankY] = 0;
+			newNode->Parent = n;
+			newNode->Direction = Down;
+			newNode->BlankX = n->BlankX - 1;
+			//newNode->H = Node::ManhattanHeuristic(newNode->State,_solution->State, _size);
+			newNode->H = _heuristic->getH(newNode);
+			_openList.push_back(newNode);
+		}
 
-					newNode->H = Node::ManhattanHeuristic(newNode->State,_solution->State, _size);
-					_openList.push_back(newNode);
-				}
-				if (i != _size - 1)
-				{
-					Node * newNode = new Node(*n);
-					newNode->State[i][j] = n->State[i + 1][j];
-					newNode->State[i + 1][j] = 0;
-					newNode->Parent = n;
+	}
 
-					newNode->H = Node::ManhattanHeuristic(newNode->State,_solution->State, _size);
-					_openList.push_back(newNode);
-				}
-				if (j != 0)
-				{
-					Node * newNode = new Node(*n);
-					newNode->State[i][j] = n->State[i][j - 1];
-					newNode->State[i][j - 1] = 0;
-					newNode->Parent = n;
+	if (n->BlankX != _size - 1 && n->Direction != Down)
+	{
 
-					newNode->H = Node::ManhattanHeuristic(newNode->State,_solution->State, _size);
-					_openList.push_back(newNode);
-				}
-				if (j != _size - 1)
-				{
-					Node * newNode = new Node(*n);
-					newNode->State[i][j] = n->State[i][j + 1];
-					newNode->State[i][j + 1] = 0;
-					newNode->Parent = n;
-
-					newNode->H = Node::ManhattanHeuristic(newNode->State,_solution->State, _size);
-					_openList.push_back(newNode);
-				}
-				return;
-			}
+		Node * newNode = new Node(*n);
+		if (!isInClosedList(newNode))
+		{
+			newNode->State[n->BlankX][n->BlankY] = n->State[n->BlankX + 1][n->BlankY];
+			newNode->State[n->BlankX + 1][n->BlankY] = 0;
+			newNode->Parent = n;
+			newNode->Direction = Up;
+			newNode->BlankX = n->BlankX + 1;
+			//newNode->H = Node::ManhattanHeuristic(newNode->State,_solution->State, _size);
+			newNode->H = _heuristic->getH(newNode);
+			_openList.push_back(newNode);
 		}
 	}
+	if (n->BlankY != 0  && n->Direction != Left)
+	{
+		Node * newNode = new Node(*n);
+		if (!isInClosedList(newNode))
+		{
+			newNode->State[n->BlankX][n->BlankY] = n->State[n->BlankX][n->BlankY - 1];
+			newNode->State[n->BlankX][n->BlankY - 1] = 0;
+			newNode->Parent = n;
+			newNode->Direction = Right;
+			newNode->BlankY = n->BlankY - 1;
+			//newNode->H = Node::ManhattanHeuristic(newNode->State,_solution->State, _size);
+			newNode->H = _heuristic->getH(newNode);
+			_openList.push_back(newNode);
+		}
+	}
+	if (n->BlankY != _size - 1 && n->Direction != Right)
+	{
+		Node * newNode = new Node(*n);
+		if (!isInClosedList(newNode))
+		{
+			newNode->State[n->BlankX][n->BlankY] = n->State[n->BlankX][n->BlankY + 1];
+			newNode->State[n->BlankX][n->BlankY + 1] = 0;
+			newNode->Parent = n;
+			newNode->Direction = Left;
+			newNode->BlankY = n->BlankY + 1;
+			//newNode->H = Node::ManhattanHeuristic(newNode->State,_solution->State, _size);
+			newNode->H = _heuristic->getH(newNode);
+			_openList.push_back(newNode);
+		}
+	}
+	return;
 }
 
-
-void AStar::showNode(Node *n)
+void AStar::showOpenList()
 {
-	std::cout <<"\taddr : " << std::hex << n << "  -  parent : " << std::hex << n->Parent << std::endl;
-	for (int aa = 0; aa < n->Size; aa++)
-	{
-		std::cout << "\t";
-		for (int bb = 0; bb < n->Size; bb++)
-		{
-			std::cout << n->State[aa][bb] << "\t";
-		}
-		std::cout << std::endl;
-	}
-	std::cout << std::endl;
+	std::cout << "Open :" << std::endl;
+	std::list<Node*>::iterator itopen = _openList.begin();
+	std::list<Node*>::iterator endopen = _openList.end();
+	while (itopen != endopen)
+		(*(itopen++))->show();
 }
+
+void AStar::showClosedList()
+{
+	std::cout << "Closed :" << std::endl;
+	std::list<Node*>::iterator itclosed = _closedList.begin();
+	std::list<Node*>::iterator endclosed = _closedList.end();
+	while (itclosed != endclosed)
+		(*(itclosed++))->show();
+}
+
 
 Node* AStar::getSolution()
 {

@@ -1,8 +1,11 @@
-#pragma once
+#ifndef		_ASTAR_H_
+# define	_ASTAR_H_
 
 #include <list>
 #include "Node.h"
-#define BLANK 0
+#include "IHeuristic.h"
+#include "Manhattan.h"
+
 class AStar
 {
 private:
@@ -12,15 +15,20 @@ private:
 	std::list<Node*> _openList;
 	std::list<Node*> _closedList;
 	int** _matrixHelper;
+	time_t _startTime;
+	IHeuristic* _heuristic;
 public:
 	AStar(int size, int** initialState);
 	void getPossibleMove(Node * n);
 	~AStar(void);
 	void run();
-	void showNode(Node *n);
 	int getMatrixValue(int y, int x);
 	Node* getSolution();
 	int** fillMatrix();
-	bool AStar::isInClosedList(std::list<Node*>::iterator check);
+	bool AStar::isInClosedList(Node* n);
 	void AStar::getBestNode(std::list<Node*>::iterator & current);
+	void showOpenList();
+	void showClosedList();
 };
+
+#endif
