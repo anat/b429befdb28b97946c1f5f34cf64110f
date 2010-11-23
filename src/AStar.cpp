@@ -89,20 +89,21 @@ void AStar::getBestNode(std::list<Node*>::iterator & current)
 	{
 		if ((*it)->H == 0)
 		{
+			#ifdef _WIN32
+			_startTime = (GetTickCount() - _startTime);
+			#else
+			_startTime = (time(0) - _startTime);
+			#endif
 			int i = 0;
 			Node * n = (*it);
-#ifdef _WIN32
-			std::cout << (GetTickCount() - _startTime) << " millisecondes" << std::endl;
-#else
-			std::cout << (time(0) - _startTime) << " secondes" << std::endl;
-#endif
+
+			std::cout << _startTime << " millisecondes" << std::endl;
+
 			std::string outputfile(_file + std::string(".solution"));
 			std::ofstream ofs(outputfile.c_str());
-			#ifdef _WIN32
-			ofs << "Compute time : " << (GetTickCount() - _startTime) << " Milliseconds" << std::endl;
-#else
-			ofs << "Compute time : " << (time(0) - _startTime) << " seconds" << std::endl;
-#endif
+
+
+
 			std::list<const char *> solution;
 			while (n->Parent != 0)
 			{
@@ -112,6 +113,7 @@ void AStar::getBestNode(std::list<Node*>::iterator & current)
 				i++;
 			}
 			
+			ofs << "Moves : " << i << " Compute time : " << _startTime << " Milliseconds" << std::endl;
 			
 			std::list<const char *>::const_iterator it = solution.begin();
 			std::list<const char *>::const_iterator end = solution.end();
