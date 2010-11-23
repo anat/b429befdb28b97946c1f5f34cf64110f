@@ -16,6 +16,7 @@ Node::Node(Node const &copy)
 		for (int j = 0 ; j < copy.Size ; j++)
 			this->State[i][j] =	copy.State[i][j];
 	this->BlankX = copy.BlankX;
+	this->G = copy.G + 1;
 	this->BlankY = copy.BlankY;
 }
 

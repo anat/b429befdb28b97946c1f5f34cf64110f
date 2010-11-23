@@ -20,6 +20,7 @@ AStar::AStar(int size, int** initialState) : _matrixHelper(0), _solution(0)
 	n->State = initialState;
 	n->Size = size;
 	n->setBlank();
+	n->G = 0;
 	_initialState = n;
 	_solution = getSolution();
 	_heuristic = new Manhattan(_solution);

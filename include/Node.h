@@ -21,6 +21,7 @@ public:
 	int Size;
 	Node* Parent;
 	int H;
+	int G;
 	TDirection Direction;
 	int BlankX;
 	int BlankY;

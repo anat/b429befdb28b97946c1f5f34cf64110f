@@ -60,7 +60,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="sfml-graphics-s-d.lib sfml-window-s-d.lib sfml-main.lib sfml-system-s-d.lib"
 				AdditionalLibraryDirectories="..\lib\SFML-1.6"
-				GenerateDebugInformation="false"
+				GenerateDebugInformation="true"
 				TargetMachine="1"
 			/>
 			<Tool

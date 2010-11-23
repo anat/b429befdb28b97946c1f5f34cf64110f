@@ -5,6 +5,7 @@
 
 Parser::Parser(std::string const & file) : _ifs(file.c_str()), _size(0), 	_state(0)
 {
+	_file = file;
 	if ((_state = readInitialState()))
 	{
 		std::cout << "Good \"Taquin\" File of " << _size << std::endl;
@@ -71,7 +72,7 @@ bool Parser::validateState(int ** base)
 
 	// Check if first is the good number
 	elements.sort();
-	
+
 	if (*(elements.begin()) != 0)
 		err = true;
 
@@ -105,6 +106,25 @@ int** Parser::getInitialState()
 int Parser::getSize()
 {
 	return _size;
+}
+
+void Parser::getSolution(std::list<std::string *> & solution)
+{
+	
+	
+	std::cout << "ouvre :" << std::string(_file + ".solution").c_str() << std::endl;
+	std::ifstream ifs(std::string(_file + ".solution").c_str());
+
+	std::string *line = new std::string();
+	std::getline(ifs,*line);
+	std::cout << line << std::endl;
+	while(std::getline(ifs,*line))
+	{
+		std::cout << *line << std::endl;
+		solution.push_back(line);
+		line = new std::string();
+	}
+	ifs.close();
 }
 
 Parser::~Parser(void)
