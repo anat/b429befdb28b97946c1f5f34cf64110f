@@ -1,0 +1,32 @@
+GENERAL:
+OK      faire une arborescence propre.
+        faire un makefile.
+OK      organiser le contenus des fichier / cleaner les fichiers.
+OK      commenter le code.
+        faire l'option -o
+        ajouter d'autres heuristique que manhattan.
+        preparer une doc / imprimer.
+
+
+OPTIMISATIONS:
+OK    :|  tableau pour trouver la place d'un nombre dans l'etat final.
+          stocker l'opened list sous forme d'arbres.
+          stocker la closed list sous forme de table de hash avec gestion des collisions.
+      :)  ne pas mallocer a tout va. (3*3 non solvable: 25m01 -> 17m40 -> 9m18)
+          ne pas recalculer la position du blank sur chaques nodes.
+          ne pas recalculer mahattan sur toutes les cases de chaques nodes.
+OK    :|  inline / macros swap si possible.
+OK    :)  optimiser la macro abs. (~100ms sur 8s)
+
+
+COMPILATIONS:
+      :s  -O1 -O2 -O3 -Os.
+OK    :)  compiler en 64 bits. (~1300ms sur 8s)
+      :|  -fomit-frame-pointer
+      :|  -funroll-loop
+      :|  -march=native, -mtune=native?
+
+
+PK PAS:
+          bufferise la sortie?
+          ne pas utiliser 4 poiteurs mais seulement 3 (attention au premier cas)?
