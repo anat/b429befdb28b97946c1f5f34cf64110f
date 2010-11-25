@@ -22,6 +22,7 @@ public:
 	Node* Parent;
 	int H;
 	int G;
+	int F;
 	TDirection Direction;
 	int BlankX;
 	int BlankY;

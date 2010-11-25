@@ -26,26 +26,20 @@ void Game::run(int size, int **initialState)
 		return;
 	}
 
-	// Exécution de la boucle principale
 	while (_main->IsOpened())
 	{
-		// Traitement des évènements
 		sf::Event Event;
 		while (_main->GetEvent(Event))
 		{
-			// Fenêtre fermée : on quitte
 			if (Event.Type == sf::Event::Closed)
 				_main->Close();
 			if ((Event.Type == sf::Event::KeyReleased) && (Event.Key.Code == sf::Key::Right))
 				next();
 		}
 
-		// Efface l'écran (remplissage avec du noir)
 		_main->Clear();
-		
-		show();
 
-		// Affichage du contenu de la fenêtre à l'écran
+		show();
 		_main->Display();
 	}
 }
@@ -57,15 +51,18 @@ void Game::show()
 	{
 		for (int j = 0 ; j < _size ; j++)
 		{
-			sf::String n;
-			std::string s;
-			std::stringstream  ssnb(s);
-			ssnb << _grid[j][i];
-			n.SetText(ssnb.str());
-			n.SetFont(_ubuntuFont);
-			n.SetSize(20);
-			n.SetPosition(100 * i, 100 * j);
-			_main->Draw(n);
+			if (_grid[j][i] != 0)
+			{
+				sf::String n;
+				std::string s;
+				std::stringstream  ssnb(s);
+				ssnb << _grid[j][i];
+				n.SetText(ssnb.str());
+				n.SetFont(_ubuntuFont);
+				n.SetSize(20);
+				n.SetPosition((100 * i) + 50, (100 * j) + 50);
+				_main->Draw(n);
+			}
 		}
 	}
 }
@@ -87,7 +84,7 @@ void Game::next()
 						std::cout << "iciL" << std::endl;
 						_grid[i][j] = _grid[i][j + 1];
 						_grid[i][j + 1] = 0;
-												++_it;
+						++_it;
 						return;
 					}
 					if (std::string((**_it)) == "Right")
@@ -95,7 +92,7 @@ void Game::next()
 						std::cout << "iciR" << std::endl;
 						_grid[i][j] = _grid[i][j - 1];
 						_grid[i][j - 1] = 0;
-												++_it;
+						++_it;
 						return;
 					}
 
@@ -104,7 +101,7 @@ void Game::next()
 						std::cout << "iciU" << std::endl;
 						_grid[i][j] = _grid[i + 1][j];
 						_grid[i + 1][j] = 0;
-												++_it;
+						++_it;
 						return;
 					}
 					if (std::string((**_it)) == "Down")
@@ -119,6 +116,6 @@ void Game::next()
 			}
 
 		}
-		
+
 	}
 }

@@ -26,7 +26,7 @@ int Manhattan::getH(Node * n)
 			cost += (l > j ? l - j : j - l);
 		}
 	}
-	std::cout << n->G << std::endl;
+	//std::cout << n->G << std::endl;
 	//cost += n->G;
 	return cost;
 }

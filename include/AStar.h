@@ -40,8 +40,10 @@ public:
 	int** fillMatrix();
 	bool AStar::isInClosedList(Node* n);
 	void AStar::getBestNode(std::list<Node*>::iterator & current);
-	void showOpenList();
+	void showOpenList(bool onlyH = false);
 	void showClosedList();
+	void solutionFound(Node* n);
+void findLowestInClosedList(Node * n, std::list<Node*>::iterator &);
 };
 
 #endif

@@ -21,6 +21,7 @@ AStar::AStar(int size, int** initialState) : _matrixHelper(0), _solution(0)
 	n->Size = size;
 	n->setBlank();
 	n->G = 0;
+	n->F = 9999;
 	_initialState = n;
 	_solution = getSolution();
 	_heuristic = new Manhattan(_solution);
@@ -40,30 +41,32 @@ void AStar::run(char const * file)
 	getPossibleMove(_initialState);
 	_closedList.splice(_closedList.begin(), _openList, _openList.begin());
 
+	//showOpenList();
+	//system("pause");
 
 	std::list<Node*>::iterator current;
 	current = _openList.begin();
 	while (1)
 	{
-		//if (_openList.size() % 1000 == 0)
-		//std::cout << "Taille de la openList " << std::dec <<  _openList.size() << std::endl;
+		if ((*current)->H == 0)
+			solutionFound((*current));
 
-		//if (_closedList.size() % 1000 == 0)
-		//std::cout << "Taille de la closedList " << std::dec <<  _closedList.size() << std::endl;
 
-		//if (_openList.size() == 0)
+		//if (_openList.size() > 1000)
 		//{
-		//	std::cout << "No solution" << std::endl;
+		//	showOpenList(true);
+		//	system("pause");
 		//}
-		//else
-		//{
+
 		// get The most interesting node
-		getBestNode(current);
+		//getBestNode(current);
+		//std::cout << "Open List size =" << _openList.size() << std::endl;
+		//std::cout << "Closed List size =" << _closedList.size() << std::endl;
+		current = _openList.begin();
 		// get All new possible moves
 		getPossibleMove((*current));
 		// Move the CostLess Node to closedList
 		_closedList.splice(_closedList.begin(), _openList, current);
-		//}
 	}
 }
 
@@ -82,62 +85,30 @@ bool AStar::isInClosedList(Node* n)
 
 void AStar::getBestNode(std::list<Node*>::iterator & current)
 {
-	int save = 9999;
+	int save = 99999999;
 	// Looking for CostLess Node
 	std::list<Node*>::iterator it = _openList.begin();
 	std::list<Node*>::iterator end = _openList.end();
 	for (; it != end ; ++it)
 	{
 		if ((*it)->H == 0)
-		{
-			#ifdef _WIN32
-			_startTime = (GetTickCount() - _startTime);
-			#else
-			_startTime = (time(0) - _startTime);
-			#endif
-			int i = 0;
-			Node * n = (*it);
-
-			std::cout << _startTime << " millisecondes" << std::endl;
-
-			std::string outputfile(_file + std::string(".solution"));
-			std::ofstream ofs(outputfile.c_str());
-
-
-
-			std::list<const char *> solution;
-			while (n->Parent != 0)
-			{
-				std::cout << n->getDirByEnum() << std::endl;
-				solution.push_front(n->getDirByEnum());
-				n = n->Parent;
-				i++;
-			}
-			
-			ofs << "Moves : " << i << " Compute time : " << _startTime << " Milliseconds" << std::endl;
-			
-			std::list<const char *>::const_iterator it = solution.begin();
-			std::list<const char *>::const_iterator end = solution.end();
-
-			for (; it != end ; ++it)
-			{
-				ofs << (*it) << std::endl;
-			}
-			ofs.close();
-
-			std::cout << "FOUND en " << i << " coups" << std::endl;
-			system("pause");
-			this->showClosedList();
-			exit(0);
-		}
+			solutionFound((*it));
 		else if ((*it)->H < save)
 		{
-
 			current = it;
 			save = (*it)->H;
+			//std::cout << (*it)->F << std::endl;
 		}
 	}
-	//std::cout << "Plus petit : " << save << std::endl;
+	std::cout << "Plus petit : " << save << std::endl;
+}
+
+void AStar::findLowestInClosedList(Node * n, std::list<Node*>::iterator & it)
+{
+	it = _openList.begin();
+	std::list<Node*>::iterator end = _openList.end();
+	while (it != end && (*it)->F < n->F)
+		++it;
 }
 
 void AStar::getPossibleMove(Node * n)
@@ -153,9 +124,12 @@ void AStar::getPossibleMove(Node * n)
 			newNode->Direction = Down;
 			newNode->BlankX = n->BlankX - 1;
 			newNode->H = _heuristic->getH(newNode);
-			_openList.push_back(newNode);
+			newNode->F = newNode->G + newNode->H;
+			std::list<Node*>::iterator it = _openList.begin();
+			findLowestInClosedList(newNode, it);
+			_openList.insert(it,newNode);
+			//_openList.push_back(newNode);
 		}
-
 	}
 
 	if (n->BlankX != _size - 1 && n->Direction != Down)
@@ -170,7 +144,11 @@ void AStar::getPossibleMove(Node * n)
 			newNode->Direction = Up;
 			newNode->BlankX = n->BlankX + 1;
 			newNode->H = _heuristic->getH(newNode);
-			_openList.push_back(newNode);
+			newNode->F = newNode->G + newNode->H;
+			std::list<Node*>::iterator it = _openList.begin();
+			findLowestInClosedList(newNode, it);
+			_openList.insert(it,newNode);
+			//_openList.push_back(newNode);
 		}
 	}
 	if (n->BlankY != 0  && n->Direction != Left)
@@ -184,7 +162,11 @@ void AStar::getPossibleMove(Node * n)
 			newNode->Direction = Right;
 			newNode->BlankY = n->BlankY - 1;
 			newNode->H = _heuristic->getH(newNode);
-			_openList.push_back(newNode);
+			newNode->F = newNode->G + newNode->H;
+			std::list<Node*>::iterator it = _openList.begin();
+			findLowestInClosedList(newNode, it);
+			_openList.insert(it,newNode);
+			//_openList.push_back(newNode);
 		}
 	}
 	if (n->BlankY != _size - 1 && n->Direction != Right)
@@ -198,19 +180,29 @@ void AStar::getPossibleMove(Node * n)
 			newNode->Direction = Left;
 			newNode->BlankY = n->BlankY + 1;
 			newNode->H = _heuristic->getH(newNode);
-			_openList.push_back(newNode);
+			newNode->F = newNode->G + newNode->H;
+			std::list<Node*>::iterator it = _openList.begin();
+			findLowestInClosedList(newNode, it);
+			_openList.insert(it,newNode);
+			//_openList.push_back(newNode);
 		}
 	}
 	return;
 }
 
-void AStar::showOpenList()
+void AStar::showOpenList(bool onlyH)
 {
-	std::cout << "Open :" << std::endl;
+	std::cout << std::endl << "Open List :" << std::endl << std::endl;
 	std::list<Node*>::iterator itopen = _openList.begin();
 	std::list<Node*>::iterator endopen = _openList.end();
 	while (itopen != endopen)
-		(*(itopen++))->show();
+	{
+		if (onlyH)
+			std::cout << (*(itopen++))->H << std::endl;
+		else
+			(*(itopen++))->show();
+	}
+	std::cout << "End of open List" << std::endl << std::endl;
 }
 
 void AStar::showClosedList()
@@ -222,6 +214,49 @@ void AStar::showClosedList()
 		(*(itclosed++))->show();
 }
 
+void AStar::solutionFound(Node* n)
+{
+	//found
+#ifdef _WIN32
+	_startTime = (GetTickCount() - _startTime);
+#else
+	_startTime = (time(0) - _startTime);
+#endif
+	int i = 0;
+	//Node * n = (*it);
+
+	std::cout << _startTime << " millisecondes" << std::endl;
+
+	std::string outputfile(_file + std::string(".solution"));
+	std::ofstream ofs(outputfile.c_str());
+
+
+
+	std::list<const char *> solution;
+	while (n->Parent != 0)
+	{
+		std::cout << n->getDirByEnum() << std::endl;
+		solution.push_front(n->getDirByEnum());
+		n = n->Parent;
+		i++;
+	}
+
+	ofs << "Moves : " << i << " Compute time : " << _startTime << " Milliseconds" << std::endl;
+
+	std::list<const char *>::const_iterator it = solution.begin();
+	std::list<const char *>::const_iterator end = solution.end();
+
+	for (; it != end ; ++it)
+	{
+		ofs << (*it) << std::endl;
+	}
+	ofs.close();
+
+	std::cout << "FOUND en " << i << " coups" << std::endl;
+	system("pause");
+	//this->showClosedList();
+	exit(0);
+}
 
 Node* AStar::getSolution()
 {

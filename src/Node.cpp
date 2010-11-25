@@ -63,12 +63,13 @@ void Node::show()
 	std::cout << "-----------Node-------------------------------" << std::endl;
 	std::cout << "\taddr : " << std::hex << this << "  -  parent : " << std::hex << this->Parent << std::endl;
 	std::cout << "\tdir = " << getDirByEnum() << std::endl << "\tBlank x=" << BlankX << " y=" << BlankY << std::endl;
+	std::cout << "\tG=" << G << "\rH=" << H << std::endl;
 	for (int aa = 0; aa < this->Size; aa++)
 	{
 		std::cout << "\t";
 		for (int bb = 0; bb < this->Size; bb++)
 		{
-			std::cout << this->State[aa][bb] << "\t";
+			std::cout << std::dec << this->State[aa][bb] << "\t";
 		}
 		std::cout << std::endl;
 	}

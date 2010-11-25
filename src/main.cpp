@@ -6,7 +6,7 @@ int		main(int ac, char** av)
 {
 	char const * file;
 	
-	file = "niv1-3x3.taquin";
+	//file = "niv1-3x3.taquin";
 	//file = "niv2-3x3.taquin";
 	//file = "niv3-3x3.taquin";
 	//file = "niv4-4x4.taquin";
@@ -14,7 +14,7 @@ int		main(int ac, char** av)
 	//file = "niv6-5x5.taquin";
 	//file = "niv7-6x6.taquin";
 	//file = "niv8-3x3.taquin";
-	//file = "niv9-4x4.taquin";
+	file = "niv9-4x4.taquin"; //31ms
 	Parser p(file);
 	int** base = p.getInitialState();
 	int size = p.getSize();
