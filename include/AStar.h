@@ -4,13 +4,8 @@
 #include <list>
 #include "Node.h"
 #include "IHeuristic.h"
-#include "Manhattan.h"
-
-#ifdef _WIN32
-#include "Windows.h"
-#else
 #include "time.h"
-#endif
+
 
 class AStar
 {
@@ -22,11 +17,7 @@ private:
 	std::list<Node*> _closedList;
 	int** _matrixHelper;
 	char const * _file;
-#ifdef _WIN32
-	DWORD _startTime;
-#else
-	time_t _startTime;
-#endif
+	clock_t _startTime;
 
 	IHeuristic* _heuristic;
 

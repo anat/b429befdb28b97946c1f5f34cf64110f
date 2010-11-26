@@ -1,20 +1,13 @@
 #include "AStar.h"
-# include <iostream>
-# include <fstream>
-#ifdef _WIN32
-# include "Windows.h"
-#else
-# include <time.h>
-#endif
-
+#include <iostream>
+#include <fstream>
+#include "Manhattan.h"
+#include "Manhattan9.h"
 
 AStar::AStar(int size, int** initialState) : _matrixHelper(0), _solution(0)
 {
-#ifdef _WIN32
-	_startTime = GetTickCount();
-#else
-	_startTime = time(0);
-#endif
+	_startTime = clock();
+
 	_size = size;
 	Node* n = new Node();
 	n->State = initialState;
@@ -24,7 +17,7 @@ AStar::AStar(int size, int** initialState) : _matrixHelper(0), _solution(0)
 	n->F = 9999;
 	_initialState = n;
 	_solution = getSolution();
-	_heuristic = new Manhattan(_solution);
+	_heuristic = new Manhattan9(_solution);
 	//_solution->show();
 }
 
@@ -48,6 +41,12 @@ void AStar::run(char const * file)
 	current = _openList.begin();
 	while (1)
 	{
+		if (_openList.size() == 0)
+		{
+			std::cout << "Solution not found" << std::endl;
+			exit(0);
+		}
+
 		if ((*current)->H == 0)
 			solutionFound((*current));
 
@@ -123,7 +122,7 @@ void AStar::getPossibleMove(Node * n)
 			newNode->Parent = n;
 			newNode->Direction = Down;
 			newNode->BlankX = n->BlankX - 1;
-			newNode->H = _heuristic->getH(newNode);
+			newNode->H = _heuristic->getH(n, newNode);
 			newNode->F = newNode->G + newNode->H;
 			std::list<Node*>::iterator it = _openList.begin();
 			findLowestInClosedList(newNode, it);
@@ -143,7 +142,7 @@ void AStar::getPossibleMove(Node * n)
 			newNode->Parent = n;
 			newNode->Direction = Up;
 			newNode->BlankX = n->BlankX + 1;
-			newNode->H = _heuristic->getH(newNode);
+			newNode->H = _heuristic->getH(n, newNode);
 			newNode->F = newNode->G + newNode->H;
 			std::list<Node*>::iterator it = _openList.begin();
 			findLowestInClosedList(newNode, it);
@@ -161,7 +160,7 @@ void AStar::getPossibleMove(Node * n)
 			newNode->Parent = n;
 			newNode->Direction = Right;
 			newNode->BlankY = n->BlankY - 1;
-			newNode->H = _heuristic->getH(newNode);
+			newNode->H = _heuristic->getH(n, newNode);
 			newNode->F = newNode->G + newNode->H;
 			std::list<Node*>::iterator it = _openList.begin();
 			findLowestInClosedList(newNode, it);
@@ -179,7 +178,7 @@ void AStar::getPossibleMove(Node * n)
 			newNode->Parent = n;
 			newNode->Direction = Left;
 			newNode->BlankY = n->BlankY + 1;
-			newNode->H = _heuristic->getH(newNode);
+			newNode->H = _heuristic->getH(n, newNode);
 			newNode->F = newNode->G + newNode->H;
 			std::list<Node*>::iterator it = _openList.begin();
 			findLowestInClosedList(newNode, it);
@@ -218,7 +217,7 @@ void AStar::solutionFound(Node* n)
 {
 	//found
 #ifdef _WIN32
-	_startTime = (GetTickCount() - _startTime);
+	_startTime = (clock() - _startTime);
 #else
 	_startTime = (time(0) - _startTime);
 #endif

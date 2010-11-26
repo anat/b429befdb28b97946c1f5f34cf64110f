@@ -9,7 +9,7 @@ public:
 	IHeuristic(){};
 	IHeuristic(Node * solution);
 	virtual ~IHeuristic(void) {};
-	virtual int getH(Node * n) = 0;
+	virtual int getH(Node * beforeState, Node* currentState) = 0;
 };
 
 #endif

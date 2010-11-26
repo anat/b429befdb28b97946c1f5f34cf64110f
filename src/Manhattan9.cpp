@@ -1,7 +1,8 @@
-#include "Manhattan.h"
+#include "Manhattan9.h"
 #include "Node.h"
 #include <iostream>
-Manhattan::Manhattan(Node * solution)
+
+Manhattan9::Manhattan9(Node * solution)
 {
 	_size = solution->Size;
 	for (int i = 0 ; i < _size ; i++)
@@ -9,19 +10,19 @@ Manhattan::Manhattan(Node * solution)
 			this->_helper[solution->State[i][j]] = std::pair<int, int>(i, j);
 }
 
-Manhattan::~Manhattan(void)
+Manhattan9::~Manhattan9(void)
 {
 }
 
-int Manhattan::getH(Node * n)
+int Manhattan9::getH(Node * beforeState, Node* currentState)
 {
 	int cost = 0;
 	for (int i = 0 ; i < _size ; i++)
 	{
 		for (int j = 0 ; j < _size ; j++)
 		{
-			int k = this->_helper[n->State[i][j]].first;
-			int l = this->_helper[n->State[i][j]].second;
+			int k = this->_helper[currentState->State[i][j]].first;
+			int l = this->_helper[currentState->State[i][j]].second;
 			cost += (k > i ? k - i : i - k);
 			cost += (l > j ? l - j : j - l);
 		}
