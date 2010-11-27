@@ -15,7 +15,7 @@ private:
 	int	_size;
 	std::list<Node*> _openList;
 	std::map<std::pair<int, int>, std::list<Node*>> _closedList2;
-	std::list<Node*> _closedList;
+	//std::list<Node*> _closedList;
 	int** _matrixHelper;
 	char const * _file;
 	clock_t _startTime;

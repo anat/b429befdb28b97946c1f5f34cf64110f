@@ -4,7 +4,7 @@
 #include "Manhattan.h"
 #include "Manhattan9.h"
 
-#define TRACE 1
+//#define TRACE 1
 #ifdef TRACE
 std::map<std::string,clock_t> tracing;
 #endif
@@ -24,6 +24,11 @@ _startTime(clock())
 	_initialState = n;
 	_solution = getSolution();
 	_heuristic = new Manhattan9(_solution);
+#ifdef TRACE
+	tracing["findLowestInClosedList"] = 0;
+	tracing["parcours"] = 0;
+	tracing["total"] = 0;
+#endif
 }
 
 AStar::~AStar(void)
@@ -33,17 +38,15 @@ AStar::~AStar(void)
 
 void AStar::run(char const * file)
 {
-		#ifdef TRACE
-tracing["findLowestInClosedList"] = 0;
-#endif
+
 	_file = file;
 	// Add the start to the open list
 	_openList.push_back(_initialState);
 	getPossibleMove(_initialState);
-	_closedList.splice(_closedList.begin(), _openList, _openList.begin());
-
-	//showOpenList();
-	//system("pause");
+	_closedList2[std::pair<int, int>((*_openList.begin())->BlankX, (*_openList.begin())->BlankY)].splice(
+		_closedList2[std::pair<int, int>((*_openList.begin())->BlankX,(*_openList.begin())->BlankY)].begin()
+		, _openList, 
+		_openList.begin());
 
 	std::list<Node*>::iterator current;
 	current = _openList.begin();
@@ -63,17 +66,20 @@ tracing["findLowestInClosedList"] = 0;
 
 		// get The most interesting node
 		//getBestNode(current);
-		//std::cout << "Open List size =" << _openList.size() << std::endl;
-		//std::cout << "Closed List size =" << _closedList.size() << std::endl;
 		current = _openList.begin();
 		// get All new possible moves
 		getPossibleMove((*current));
 
-			// Move the CostLess Node to closedList
-		_closedList.splice(_closedList.begin(), _openList, current);
+		// Move the CostLess Node to closedList
+		_closedList2[std::pair<int, int>((*current)->BlankX, (*current)->BlankY)].splice(
+			_closedList2[std::pair<int, int>((*current)->BlankX,(*current)->BlankY)].begin()
+			, _openList, 
+			current);
 	}
 #ifdef TRACE
 	std::cout << "Time IN findLowestInClosedList = " << tracing["findLowestInClosedList"] << std::endl;
+	std::cout << "Parcouru\t" << tracing["parcours"] << std::endl;
+	std::cout << "Total\t\t" << tracing["total"] << std::endl;
 #endif
 	if (found)
 	{
@@ -87,10 +93,11 @@ tracing["findLowestInClosedList"] = 0;
 
 bool AStar::isInClosedList(Node* n)
 {
-	if (_closedList.size() == 0)
+	if (_closedList2[std::pair<int, int>(n->BlankX, n->BlankY)].size() == 0)
 		return false;
-	std::list<Node*>::iterator itclosed = _closedList.begin();
-	std::list<Node*>::iterator endclosed = _closedList.end();
+
+	std::list<Node*>::iterator itclosed = _closedList2[std::pair<int, int>(n->BlankX, n->BlankY)].begin();
+	std::list<Node*>::iterator endclosed = _closedList2[std::pair<int, int>(n->BlankX, n->BlankY)].end();
 	while (itclosed != endclosed && Node::Equals((*itclosed), n) == false)
 		itclosed++;
 	if (itclosed != endclosed)
@@ -98,42 +105,26 @@ bool AStar::isInClosedList(Node* n)
 	return false;
 }
 
-void AStar::getBestNode(std::list<Node*>::iterator & current)
-{
-	int save = 99999999;
-	// Looking for CostLess Node
-	std::list<Node*>::iterator it = _openList.begin();
-	std::list<Node*>::iterator end = _openList.end();
-	for (; it != end ; ++it)
-	{
-		if ((*it)->H == 0)
-			solutionFound((*it));
-		else if ((*it)->H < save)
-		{
-			current = it;
-			save = (*it)->H;
-			//std::cout << (*it)->F << std::endl;
-		}
-	}
-	//std::cout << "Plus petit : " << save << std::endl;
-}
+
 
 void AStar::findLowestInClosedList(Node * n, std::list<Node*>::iterator & it)
 {
 #ifdef TRACE
-clock_t start = clock();
+	clock_t start = clock();
 #endif
 	it = _openList.begin();
 	std::list<Node*>::iterator end = _openList.end();
-	//	int i = 0;
+	int i = 0;
 	while (it != end && (*it)->F < n->F)
 	{
-		//	i++;
+		i++;
 		++it;
 	}
 	//std::cout << "Parcours de " << (i * 100) / _openList.size() << " % " << std::endl;
-	#ifdef TRACE
-tracing["findLowestInClosedList"] += clock() - start;
+#ifdef TRACE
+	tracing["findLowestInClosedList"] += clock() - start;
+	tracing["parcours"] += i;
+	tracing["total"] += _openList.size();
 #endif
 }
 
@@ -253,14 +244,14 @@ void AStar::solutionFound(Node* n)
 		ofs << (*it) << std::endl;
 	}
 	ofs.close();
-	#include <fstream>
+#include <fstream>
 	std::ofstream oofs("Tracing.txt", std::ios_base::app);
-		oofs << _file << "\t:" << _startTime << " with " << i << "moves" << std::endl;
-		oofs.close();
+	oofs << _file << "\t:" << _startTime << " with " << i << "moves" << std::endl;
+	oofs.close();
 
 	std::cout << "PASSWORD FOUND in " << i << " moves" << std::endl;
-	std::cout << "[TIME] Closed list size\t\t" << _closedList.size() << std::endl;
-	std::cout << "[SIZE] Two list size\t\t" << (_closedList.size() + _openList.size()) << std::endl;
+	//std::cout << "[TIME] Closed list size\t\t" << _closedList.size() << std::endl;
+	//std::cout << "[SIZE] Two list size\t\t" << (_closedList.size() + _openList.size()) << std::endl;
 	system("pause");
 	//this->showClosedList();
 	exit(0);
@@ -340,11 +331,31 @@ void AStar::showOpenList(bool onlyH)
 	std::cout << "End of open List" << std::endl << std::endl;
 }
 
+void AStar::getBestNode(std::list<Node*>::iterator & current)
+{
+	int save = 99999999;
+	// Looking for CostLess Node
+	std::list<Node*>::iterator it = _openList.begin();
+	std::list<Node*>::iterator end = _openList.end();
+	for (; it != end ; ++it)
+	{
+		if ((*it)->H == 0)
+			solutionFound((*it));
+		else if ((*it)->H < save)
+		{
+			current = it;
+			save = (*it)->H;
+			//std::cout << (*it)->F << std::endl;
+		}
+	}
+	//std::cout << "Plus petit : " << save << std::endl;
+}
+
 void AStar::showClosedList()
 {
-	std::cout << "Closed :" << std::endl;
-	std::list<Node*>::iterator itclosed = _closedList.begin();
-	std::list<Node*>::iterator endclosed = _closedList.end();
-	while (itclosed != endclosed)
-		(*(itclosed++))->show();
+	//std::cout << "Closed :" << std::endl;
+	//std::list<Node*>::iterator itclosed = _closedList.begin();
+	//std::list<Node*>::iterator endclosed = _closedList.end();
+	//while (itclosed != endclosed)
+	//	(*(itclosed++))->show();
 }
