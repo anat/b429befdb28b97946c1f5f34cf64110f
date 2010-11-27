@@ -21,9 +21,11 @@ int Manhattan::getH(Node * beforeState, Node* currentState)
 	int j = beforeState->BlankY;
 	int k = this->_helper[n].first;
 	int l = this->_helper[n].second;
-	cost += (k > i ? k - i : i - k);
-	cost += (l > j ? l - j : j - l);
+	cost += (k > i ? k - i : i - k) * 5;
+	cost += (l > j ? l - j : j - l) * 5;
 
+	std::cout << "Cost for " << n << " : " << cost << std::endl;
+	currentState->show();
 	//for (int i = 0 ; i < _size ; i++)
 	//{
 	//	for (int j = 0 ; j < _size ; j++)

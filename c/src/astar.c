@@ -13,8 +13,9 @@ t_tq_solver ts;
 t_node *astar(t_node *init)
 {
   t_node *cur;
-  
+
   add_to_opened_list(init);
+  printf("Ici OUUUUUU");
   while ((cur = get_best_node()))
     {
       if (!cur->h && cur != init)
@@ -77,7 +78,7 @@ void create_child(t_node *cur, int n)
   cur->c[n] = child;
   child->grid = alloc_grid();
   //child->grid = xmalloc(sizeof(*(child->grid)) * ts.grid_size);
-  memcpy(child->grid, tmp, ts.grid_size);  
+  memcpy(child->grid, tmp, ts.grid_size);
   child->parent = cur;
   child->h = ts.heuristic(child->grid);
   child->g = cur->g + 1;

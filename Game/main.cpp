@@ -5,9 +5,10 @@
 
 int main(int ac, char** av)
 {
-	Game g;
+
 	Parser p("../niv8-3x3.taquin");
-	int ** initialState = 0;
-	p.getSolution(g.Solution);
-	g.run(p.getSize(), p.getInitialState());
+	std::list<std::string*> solution;
+	p.getSolution(solution);
+	Game g(p.getSize(), p.getInitialState(), solution);
+	g.run();
 }

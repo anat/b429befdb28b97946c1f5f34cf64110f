@@ -5,7 +5,7 @@
 #include "Node.h"
 #include "IHeuristic.h"
 #include "time.h"
-
+#include <map>
 
 class AStar
 {
@@ -14,6 +14,7 @@ private:
 	Node* _solution;
 	int	_size;
 	std::list<Node*> _openList;
+	std::map<std::pair<int, int>, std::list<Node*>> _closedList2;
 	std::list<Node*> _closedList;
 	int** _matrixHelper;
 	char const * _file;

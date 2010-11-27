@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "taquin.h"
+#include "time.h"
 
 extern t_tq_solver ts;
 
@@ -34,6 +35,7 @@ void add_to_opened_list(t_node *node)
 }
 
 /* Add a node to the closed list. */
+
 inline void add_to_closed_list(t_node *node)
 {
   ts.cl_size++;
@@ -58,12 +60,15 @@ inline t_node *get_best_node()
   return (tmp);
 }
 
+static int counter = 1;
 /* Remove a node from the opened list. */
 void remove_this_node(t_node *node)
 {
+    //int counter = 0;
+    clock_t time = clock();
   t_node *tmp = ts.op_list;
   t_node *prev = NULL;
-
+counter = counter + 1;
   while (tmp)
     {
       if (tmp == node)
@@ -79,6 +84,7 @@ void remove_this_node(t_node *node)
       prev = tmp;
       tmp = tmp->next;
     }
+   	printf ("Temps en secondes : %f\n", (clock() - time) / (double)CLOCKS_PER_SEC);
 }
 
 inline t_node *is_in_list(t_node *list, char *grid)
