@@ -9,6 +9,7 @@
 std::map<std::string,clock_t> tracing;
 #endif
 
+clock_t start = 0;
 
 AStar::AStar(int size, int** initialState) : 
 _matrixHelper(0),
@@ -19,11 +20,12 @@ _startTime(clock())
 	n->State = initialState;
 	n->Size = _size;
 	n->setBlank();
-	n->G = 100;
-	n->F = 9999;
+	n->G = 0;
 	_initialState = n;
 	_solution = getSolution();
 	_heuristic = new Manhattan9(_solution);
+	n->H = _heuristic->getH(0, n);
+		n->F = n->G + n->H;
 #ifdef TRACE
 	tracing["findLowestInClosedList"] = 0;
 	tracing["parcours"] = 0;
@@ -41,22 +43,20 @@ void AStar::run(char const * file)
 
 	_file = file;
 	// Add the start to the open list
-	_openList.push_back(_initialState);
+	
 	getPossibleMove(_initialState);
-	_closedList2[std::pair<int, int>((*_openList.begin())->BlankX, (*_openList.begin())->BlankY)].splice(
-		_closedList2[std::pair<int, int>((*_openList.begin())->BlankX,(*_openList.begin())->BlankY)].begin()
-		, _openList, 
-		_openList.begin());
-
+	_closedList2[std::pair<int,int>(_initialState->BlankX, _initialState->BlankY)].push_back(_initialState);
+	
 	std::list<Node*>::iterator current;
-	current = _openList.begin();
+	
 	bool found = false;
+	clock_t total = clock();
 	while (1)
 	{
 		if (_openList.size() == 0)
-		{
 			break;
-		}
+		else
+			current = _openList.begin();
 
 		if ((*current)->H == 0)
 		{
@@ -64,9 +64,15 @@ void AStar::run(char const * file)
 			break;
 		}
 
-		// get The most interesting node
-		//getBestNode(current);
-		current = _openList.begin();
+		if (getClosedListCount() % 5000 == 0)
+		{
+			std::cout << "Analysed : " << getClosedListCount() << std::endl;
+			std::cout << "Temps passe : " << start << std::endl;
+			std::cout << "Temps total : " << clock() - total << std::endl;
+			std::cout << "Temps courant : " << clock() - _startTime << std::endl;
+			start = 0;
+			total = clock();
+		}
 		// get All new possible moves
 		getPossibleMove((*current));
 
@@ -100,6 +106,7 @@ bool AStar::isInClosedList(Node* n)
 	std::list<Node*>::iterator endclosed = _closedList2[std::pair<int, int>(n->BlankX, n->BlankY)].end();
 	while (itclosed != endclosed && Node::Equals((*itclosed), n) == false)
 		itclosed++;
+	
 	if (itclosed != endclosed)
 		return true;
 	return false;
@@ -109,17 +116,17 @@ bool AStar::isInClosedList(Node* n)
 
 void AStar::findLowestInClosedList(Node * n, std::list<Node*>::iterator & it)
 {
+clock_t s = clock();
 #ifdef TRACE
 	clock_t start = clock();
 #endif
 	it = _openList.begin();
 	std::list<Node*>::iterator end = _openList.end();
-	int i = 0;
 	while (it != end && (*it)->F < n->F)
 	{
-		i++;
 		++it;
 	}
+	start += clock() - s;
 	//std::cout << "Parcours de " << (i * 100) / _openList.size() << " % " << std::endl;
 #ifdef TRACE
 	tracing["findLowestInClosedList"] += clock() - start;
@@ -130,6 +137,8 @@ void AStar::findLowestInClosedList(Node * n, std::list<Node*>::iterator & it)
 
 void AStar::getPossibleMove(Node * n)
 {
+
+	
 	if (n->BlankX != 0 && n->Direction != Up)
 	{
 		Node * newNode = new Node(*n);
@@ -204,6 +213,8 @@ void AStar::getPossibleMove(Node * n)
 			//_openList.push_back(newNode);
 		}
 	}
+
+
 }
 
 
@@ -358,4 +369,14 @@ void AStar::showClosedList()
 	//std::list<Node*>::iterator endclosed = _closedList.end();
 	//while (itclosed != endclosed)
 	//	(*(itclosed++))->show();
+}
+
+int AStar::getClosedListCount()
+{
+	int count = 0;
+	std::map<std::pair<int, int>, std::list<Node*>>::iterator it = _closedList2.begin();
+	std::map<std::pair<int, int>, std::list<Node*>>::iterator end = _closedList2.end();
+	for (; it != end; ++it)
+		count += (*it).second.size();
+	return count;
 }

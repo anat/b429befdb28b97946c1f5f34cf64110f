@@ -35,7 +35,8 @@ public:
 	void showOpenList(bool onlyH = false);
 	void showClosedList();
 	void solutionFound(Node* n);
-void findLowestInClosedList(Node * n, std::list<Node*>::iterator &);
+	void findLowestInClosedList(Node * n, std::list<Node*>::iterator &);
+	int getClosedListCount();
 };
 
 #endif

@@ -14,8 +14,12 @@ int		main(int ac, char** av)
 	//file = "niv6-5x5.taquin";
 	//file = "niv7-6x6.taquin";
 	//file = "niv8-3x3.taquin";
-	file = "niv9-4x4.taquin"; //31ms
+	//file = "niv9-4x4.taquin"; //31ms
 	//file = "niv10-3x3.taquin";
+	//file = "niv11-5x5.taquin";
+	//file = "niv12-4x4.taquin";
+	file = "niv13-4x4.taquin";
+
 	Parser p(file);
 	int** base = p.getInitialState();
 	int size = p.getSize();

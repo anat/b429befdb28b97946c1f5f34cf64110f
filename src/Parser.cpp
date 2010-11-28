@@ -23,7 +23,7 @@ int** Parser::readInitialState()
 
 	if (_size == 0)
 	{
-		std::cerr << "Bad \"Taquin\" file" << std::endl;
+		std::cerr << "Bad \"Taquin\" file : Couldn't get size" << std::endl;
 		return 0;
 	}
 	int** base = new int*[_size];
@@ -45,13 +45,11 @@ int** Parser::readInitialState()
 			std::istringstream is(cell);
 			is >> base[x][y++];
 		}
-
 		if (y != _size)
 		{
-			std::cerr << "Bad \"Taquin\" file" << std::endl;
+			std::cerr << "Bad \"Taquin\" file : Bad width" << std::endl;
 			return 0;
 		}
-
 		x++;
 	}
 	if (!this->validateState(base))
