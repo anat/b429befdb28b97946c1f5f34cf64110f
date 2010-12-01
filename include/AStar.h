@@ -6,7 +6,6 @@
 #include "IHeuristic.h"
 #include "time.h"
 #include <map>
-#include <hash_map>
 
 class AStar
 {
@@ -15,7 +14,7 @@ private:
 	Node* _solution;
 	int	_size;
 	std::multimap<int, Node *> _openList2;
-	std::map<std::pair<int, int>, std::list<Node*>> _closedList2;
+	std::map<std::pair<int, int>, std::list<Node*> > _closedList2;
 	int** _matrixHelper;
 	char const * _file;
 	clock_t _startTime;

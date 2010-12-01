@@ -1,7 +1,6 @@
 #include <iostream>
 #include "Parser.h"
 #include "AStar.h"
-#include <hash_map>
 
 int		main(int ac, char** av)
 {
@@ -27,5 +26,4 @@ int		main(int ac, char** av)
 		AStar a(p.getSize(), p.getInitialState());
 		a.run(file);
 	}
-	system("pause");
 }

@@ -28,7 +28,7 @@ public:
 	int BlankY;
 	Node();
 	Node(Node const &);
-	static bool Node::Equals(Node *node1, Node *node2);
+	static bool Equals(Node *node1, Node *node2);
 	void setBlank();
 	void show();
 	char const * getDirByEnum();
