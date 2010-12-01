@@ -6,7 +6,7 @@
 #include "Manhattan9.h"
 #include "MisplacedTiles.h"
 
-#define TRACE 1
+//#define TRACE 1
 #ifdef TRACE
 std::map<std::string,clock_t> tracing;
 #endif
