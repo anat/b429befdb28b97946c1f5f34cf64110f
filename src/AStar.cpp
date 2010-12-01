@@ -3,6 +3,7 @@
 #include <fstream>
 #include "Manhattan.h"
 #include "Manhattan9.h"
+#include "MisplacedTiles.h"
 
 //#define TRACE 1
 #ifdef TRACE
@@ -23,7 +24,7 @@ _startTime(clock())
 	n->G = 0;
 	_initialState = n;
 	_solution = getSolution();
-	_heuristic = new Manhattan9(_solution);
+	_heuristic = new MisplacedTiles(_solution);
 	n->H = _heuristic->getH(0, n);
 		n->F = n->G + n->H;
 #ifdef TRACE
