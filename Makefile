@@ -5,7 +5,6 @@ NAME		=	taquin
 SRC		=	./src/main.cpp			\
 			./src/AStar.cpp			\
 			./src/Node.cpp			\
-			./src/LinearConflict.cpp	\
 			./src/Manhattan9.cpp		\
 			./src/MisplacedTiles.cpp	\
 			./src/Parser.cpp		\

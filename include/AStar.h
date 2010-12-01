@@ -31,14 +31,11 @@ public:
 	int** fillMatrix();
 	bool isInClosedList(Node* n);
 	bool isInOpenList(Node * n);
-	void getBestNode(std::list<Node*>::iterator & current);
-	void showOpenList(bool onlyH = false);
-	void showClosedList();
 	void solutionFound(Node* n);
 	void findLowestInClosedList(Node * n, std::list<Node*>::iterator &);
 	int getClosedListCount();
-	int getOpenListCount();
 	void createNewNode(Node *parent, Node *newNode);
+	void showInfo();
 };
 
 #endif

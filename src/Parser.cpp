@@ -84,7 +84,7 @@ bool Parser::validateState(int ** base)
 	// Check if there's no doubled values
 	elements.unique();
 
-	if (elements.size() != (_size * _size))
+	if (elements.size() != (unsigned int)(_size * _size))
 		err = true;
 
 	if (err)

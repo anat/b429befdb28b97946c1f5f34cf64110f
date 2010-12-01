@@ -23,7 +23,6 @@ int		main(int ac, char** av)
 	//file = "niv13-4x4.taquin";
 	Parser p(file);
 	int** base = p.getInitialState();
-	int size = p.getSize();
 	if (base)
 	{
 		AStar a(p.getSize(), p.getInitialState());

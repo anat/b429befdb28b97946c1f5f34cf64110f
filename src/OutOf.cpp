@@ -2,6 +2,7 @@
 
 OutOf::OutOf(Node * solution)
 {
+  solution = solution;
 }
 
 OutOf::~OutOf(void)
@@ -10,6 +11,7 @@ OutOf::~OutOf(void)
 
 int OutOf::getH(Node * beforeState, Node* currentState)
 {
+  beforeState = beforeState;
 	int cost = 0;
 	for (int i = 0 ; i < _size ; i++)
 	{

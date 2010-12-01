@@ -6,13 +6,6 @@
 #include "Manhattan9.h"
 #include "MisplacedTiles.h"
 
-//#define TRACE 1
-#ifdef TRACE
-std::map<std::string,clock_t> tracing;
-#endif
-
-clock_t start = 0;
-
 AStar::AStar(int size, int** initialState) : 
 _matrixHelper(0),
 _startTime(clock())
@@ -27,12 +20,7 @@ _startTime(clock())
 	_solution = getSolution();
 	_heuristic = new Manhattan9(_solution);
 	n->H = _heuristic->getH(0, n);
-		n->F = n->G + n->H;
-#ifdef TRACE
-	tracing["findLowestInClosedList"] = 0;
-	tracing["parcours"] = 0;
-	tracing["total"] = 0;
-#endif
+	n->F = n->G + n->H;
 }
 
 AStar::~AStar(void)
@@ -44,14 +32,13 @@ void AStar::run(char const * file)
 {
 
 	_file = file;
-	// Add the start to the open list
+	// Add the first node to the open list
 	getPossibleMove(_initialState);
 	_closedList2[std::pair<int,int>(_initialState->BlankX, _initialState->BlankY)].push_back(_initialState);
 	
 	std::multimap<int, Node*>::iterator current;
 	
 	bool found = false;
-	clock_t total = 0;
 	while (1)
 	{
 		if (_openList2.size() == 0)
@@ -64,65 +51,17 @@ void AStar::run(char const * file)
 			found = true;
 			break;
 		}
-	//start = clock();
-	//	if (getClosedListCount() % 5000 == 0)
-	//	{
-	//		std::cout << "Analysed : " << getClosedListCount() << std::endl;
-	//		std::cout << "Temps passe : " << total << std::endl;
-	//		std::cout << "Temps courant : " << clock() - _startTime << std::endl;
-	//		start = 0;
-	//		total = clock();
-	//	}
-	//total += (clock() - start);
+
 		getPossibleMove((*current).second);
 		// Move the CostLess Node to closedList
 		_closedList2[std::pair<int, int>((*current).second->BlankX, (*current).second->BlankY)].push_back((*current).second);
 		_openList2.erase(current);
+		showInfo();
 	}
-#ifdef TRACE
-	std::cout << "Time IN findLowestInClosedList = " << tracing["findLowestInClosedList"] << std::endl;
-	std::cout << "Parcouru\t" << tracing["parcours"] << std::endl;
-	std::cout << "Total\t\t" << tracing["total"] << std::endl;
-#endif
 	if (found)
-	{
 		solutionFound((*current).second);
-	}
 	else
-	{
 		std::cout << "Solution not found" << std::endl;
-	}
-}
-
-bool AStar::isInClosedList(Node* n)
-{
-	if (_closedList2[std::pair<int, int>(n->BlankX, n->BlankY)].size() == 0)
-		return false;
-
-	std::list<Node*>::iterator itclosed = _closedList2[std::pair<int, int>(n->BlankX, n->BlankY)].begin();
-	std::list<Node*>::iterator endclosed = _closedList2[std::pair<int, int>(n->BlankX, n->BlankY)].end();
-	while (itclosed != endclosed && Node::Equals((*itclosed), n) == false)
-		itclosed++;
-	
-	if (itclosed != endclosed)
-		return true;
-	return false;
-}
-
-bool AStar::isInOpenList(Node * n)
-{
-	clock_t start = clock();
-	std::multimap<int, Node*>::iterator it;
-	std::pair<std::multimap<int, Node*>::iterator, std::multimap<int, Node*>::iterator> range;
-	range = _openList2.equal_range(n->F);
-	for (it = range.first; it != range.second; ++it)
-		if (Node::Equals(n, (*it).second))
-		{
-			return true;
-		}
-		if (getClosedListCount() > 150000)
-			std::cout << "Time in isOpenList" << clock() - start << std::endl;
-	return false;
 }
 
 void AStar::createNewNode(Node * parent, Node * newNode)
@@ -189,20 +128,38 @@ void AStar::getPossibleMove(Node * n)
 
 }
 
+bool AStar::isInClosedList(Node* n)
+{
+	if (_closedList2[std::pair<int, int>(n->BlankX, n->BlankY)].size() == 0)
+		return false;
 
+	std::list<Node*>::iterator itclosed = _closedList2[std::pair<int, int>(n->BlankX, n->BlankY)].begin();
+	std::list<Node*>::iterator endclosed = _closedList2[std::pair<int, int>(n->BlankX, n->BlankY)].end();
+	while (itclosed != endclosed && Node::Equals((*itclosed), n) == false)
+		itclosed++;
+	
+	if (itclosed != endclosed)
+		return true;
+	return false;
+}
+
+bool AStar::isInOpenList(Node * n)
+{
+	std::multimap<int, Node*>::iterator it;
+	std::pair<std::multimap<int, Node*>::iterator, std::multimap<int, Node*>::iterator> range;
+	range = _openList2.equal_range(n->F);
+	for (it = range.first; it != range.second; ++it)
+		if (Node::Equals(n, (*it).second))
+			return true;
+	return false;
+}
 
 void AStar::solutionFound(Node* n)
 {
-	//found
 	_startTime = (clock() - _startTime);
 	int i = 0;
-	//Node * n = (*it);
-
 	std::string outputfile(_file + std::string(".solution"));
 	std::ofstream ofs(outputfile.c_str());
-
-
-
 	std::list<const char *> solution;
 	while (n->Parent != 0)
 	{
@@ -284,50 +241,6 @@ int AStar::getMatrixValue(int y, int x)
 	}
 }
 
-void AStar::showOpenList(bool onlyH)
-{
-	//std::cout << std::endl << "Open List :" << std::endl << std::endl;
-	//std::list<Node*>::iterator itopen = _openList.begin();
-	//std::list<Node*>::iterator endopen = _openList.end();
-	//while (itopen != endopen)
-	//{
-	//	if (onlyH)
-	//		std::cout << (*(itopen++))->H << std::endl;
-	//	else
-	//		(*(itopen++))->show();
-	//}
-	//std::cout << "End of open List" << std::endl << std::endl;
-}
-
-void AStar::getBestNode(std::list<Node*>::iterator & current)
-{
-	//int save = 99999999;
-	//// Looking for CostLess Node
-	//std::list<Node*>::iterator it = _openList.begin();
-	//std::list<Node*>::iterator end = _openList.end();
-	//for (; it != end ; ++it)
-	//{
-	//	if ((*it)->H == 0)
-	//		solutionFound((*it));
-	//	else if ((*it)->H < save)
-	//	{
-	//		current = it;
-	//		save = (*it)->H;
-	//		//std::cout << (*it)->F << std::endl;
-	//	}
-	//}
-	//std::cout << "Plus petit : " << save << std::endl;
-}
-
-void AStar::showClosedList()
-{
-	//std::cout << "Closed :" << std::endl;
-	//std::list<Node*>::iterator itclosed = _closedList.begin();
-	//std::list<Node*>::iterator endclosed = _closedList.end();
-	//while (itclosed != endclosed)
-	//	(*(itclosed++))->show();
-}
-
 int AStar::getClosedListCount()
 {
 	int count = 0;
@@ -338,16 +251,11 @@ int AStar::getClosedListCount()
 	return count;
 }
 
-int AStar::getOpenListCount()
+void AStar::showInfo()
 {
-  /*
-	int count = 0;
-	std::multimap<int, Node *>::iterator it = _openList2.begin();
-	std::multimap<int, Node *>::iterator end = _openList2.end();
-	for (; it != end; ++it)
-	  count += _openList2.size((*it));
-	return count;
-  */
-  return 0;
+	if (getClosedListCount() % 5000 == 0)
+	{
+		std::cout << "Analysed : " << getClosedListCount() << std::endl;
+		std::cout << "Temps courant : " << clock() - _startTime << std::endl;
+	}
 }
-
