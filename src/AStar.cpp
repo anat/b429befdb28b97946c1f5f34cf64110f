@@ -1,6 +1,7 @@
 #include "AStar.h"
 #include <iostream>
 #include <fstream>
+#include <map>
 #include "Manhattan.h"
 #include "Manhattan9.h"
 #include "MisplacedTiles.h"
@@ -197,8 +198,6 @@ void AStar::solutionFound(Node* n)
 	int i = 0;
 	//Node * n = (*it);
 
-	std::cout << _startTime << " millisecondes" << std::endl;
-
 	std::string outputfile(_file + std::string(".solution"));
 	std::ofstream ofs(outputfile.c_str());
 
@@ -212,7 +211,7 @@ void AStar::solutionFound(Node* n)
 		i++;
 	}
 
-	ofs << "Moves : " << i << " Compute time : " << _startTime << " Milliseconds" << std::endl;
+	ofs << "[MOVES] : " << i <</* " Compute time : " << _startTime << " Milliseconds" <<*/ std::endl;
 
 	std::list<const char *>::const_iterator it = solution.begin();
 	std::list<const char *>::const_iterator end = solution.end();
@@ -222,15 +221,8 @@ void AStar::solutionFound(Node* n)
 		ofs << (*it) << std::endl;
 	}
 	ofs.close();
-	#include <fstream>
-	std::ofstream oofs("Tracing.txt", std::ios_base::app);
-	oofs << _file << "\t:" << _startTime << " with " << i << "moves" << std::endl;
-	oofs.close();
-
-	std::cout << "PASSWORD FOUND in " << i << " moves" << std::endl;
-	//std::cout << "[TIME] Closed list size\t\t" << _closedList.size() << std::endl;
-	//std::cout << "[SIZE] Two list size\t\t" << (_closedList.size() + _openList.size()) << std::endl;
-	//this->showClosedList();
+	std::cout << "[TIME] Closed list size\t\t" << getClosedListCount() << std::endl;
+	std::cout << "[SIZE] Two list size\t\t" << (getClosedListCount() + _openList2.size()) << std::endl;
 }
 
 Node* AStar::getSolution()
@@ -345,3 +337,17 @@ int AStar::getClosedListCount()
 		count += (*it).second.size();
 	return count;
 }
+
+int AStar::getOpenListCount()
+{
+  /*
+	int count = 0;
+	std::multimap<int, Node *>::iterator it = _openList2.begin();
+	std::multimap<int, Node *>::iterator end = _openList2.end();
+	for (; it != end; ++it)
+	  count += _openList2.size((*it));
+	return count;
+  */
+  return 0;
+}
+

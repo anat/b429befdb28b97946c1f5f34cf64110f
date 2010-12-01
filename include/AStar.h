@@ -37,6 +37,7 @@ public:
 	void solutionFound(Node* n);
 	void findLowestInClosedList(Node * n, std::list<Node*>::iterator &);
 	int getClosedListCount();
+	int getOpenListCount();
 	void createNewNode(Node *parent, Node *newNode);
 };
 
