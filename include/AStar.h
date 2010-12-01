@@ -6,6 +6,7 @@
 #include "IHeuristic.h"
 #include "time.h"
 #include <map>
+#include <hash_map>
 
 class AStar
 {
@@ -13,9 +14,8 @@ private:
 	Node* _initialState;
 	Node* _solution;
 	int	_size;
-	std::list<Node*> _openList;
+	std::multimap<int, Node *> _openList2;
 	std::map<std::pair<int, int>, std::list<Node*>> _closedList2;
-	//std::list<Node*> _closedList;
 	int** _matrixHelper;
 	char const * _file;
 	clock_t _startTime;
@@ -30,13 +30,15 @@ public:
 	int getMatrixValue(int y, int x);
 	Node* getSolution();
 	int** fillMatrix();
-	bool AStar::isInClosedList(Node* n);
-	void AStar::getBestNode(std::list<Node*>::iterator & current);
+	bool isInClosedList(Node* n);
+	bool isInOpenList(Node * n);
+	void getBestNode(std::list<Node*>::iterator & current);
 	void showOpenList(bool onlyH = false);
 	void showClosedList();
 	void solutionFound(Node* n);
 	void findLowestInClosedList(Node * n, std::list<Node*>::iterator &);
 	int getClosedListCount();
+	void createNewNode(Node *parent, Node *newNode);
 };
 
 #endif

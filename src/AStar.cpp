@@ -5,7 +5,7 @@
 #include "Manhattan9.h"
 #include "MisplacedTiles.h"
 
-//#define TRACE 1
+#define TRACE 1
 #ifdef TRACE
 std::map<std::string,clock_t> tracing;
 #endif
@@ -24,7 +24,7 @@ _startTime(clock())
 	n->G = 0;
 	_initialState = n;
 	_solution = getSolution();
-	_heuristic = new MisplacedTiles(_solution);
+	_heuristic = new Manhattan9(_solution);
 	n->H = _heuristic->getH(0, n);
 		n->F = n->G + n->H;
 #ifdef TRACE
@@ -44,44 +44,40 @@ void AStar::run(char const * file)
 
 	_file = file;
 	// Add the start to the open list
-	
 	getPossibleMove(_initialState);
 	_closedList2[std::pair<int,int>(_initialState->BlankX, _initialState->BlankY)].push_back(_initialState);
 	
-	std::list<Node*>::iterator current;
+	std::multimap<int, Node*>::iterator current;
 	
 	bool found = false;
-	clock_t total = clock();
+	clock_t total = 0;
 	while (1)
 	{
-		if (_openList.size() == 0)
+		if (_openList2.size() == 0)
 			break;
 		else
-			current = _openList.begin();
+			current = _openList2.begin();
 
-		if ((*current)->H == 0)
+		if ((*current).second->H == 0)
 		{
 			found = true;
 			break;
 		}
-
-		if (getClosedListCount() % 5000 == 0)
-		{
-			std::cout << "Analysed : " << getClosedListCount() << std::endl;
-			std::cout << "Temps passe : " << start << std::endl;
-			std::cout << "Temps total : " << clock() - total << std::endl;
-			std::cout << "Temps courant : " << clock() - _startTime << std::endl;
-			start = 0;
-			total = clock();
-		}
-		// get All new possible moves
-		getPossibleMove((*current));
-
+		std::cout << getClosedListCount() << std::endl;//"\r";
+	//start = clock();
+	//	if (getClosedListCount() % 5000 == 0)
+	//	{
+	//		std::cout << "Analysed : " << getClosedListCount() << std::endl;
+	//		std::cout << "Temps passe : " << total << std::endl;
+	//		std::cout << "Temps courant : " << clock() - _startTime << std::endl;
+	//		start = 0;
+	//		total = clock();
+	//	}
+	//total += (clock() - start);
+		getPossibleMove((*current).second);
 		// Move the CostLess Node to closedList
-		_closedList2[std::pair<int, int>((*current)->BlankX, (*current)->BlankY)].splice(
-			_closedList2[std::pair<int, int>((*current)->BlankX,(*current)->BlankY)].begin()
-			, _openList, 
-			current);
+		_closedList2[std::pair<int, int>((*current).second->BlankX, (*current).second->BlankY)].push_back((*current).second);
+		_openList2.erase(current);
 	}
 #ifdef TRACE
 	std::cout << "Time IN findLowestInClosedList = " << tracing["findLowestInClosedList"] << std::endl;
@@ -90,7 +86,7 @@ void AStar::run(char const * file)
 #endif
 	if (found)
 	{
-		solutionFound((*current));
+		solutionFound((*current).second);
 	}
 	else
 	{
@@ -113,49 +109,43 @@ bool AStar::isInClosedList(Node* n)
 	return false;
 }
 
-
-
-void AStar::findLowestInClosedList(Node * n, std::list<Node*>::iterator & it)
+bool AStar::isInOpenList(Node * n)
 {
-clock_t s = clock();
-#ifdef TRACE
 	clock_t start = clock();
-#endif
-	it = _openList.begin();
-	std::list<Node*>::iterator end = _openList.end();
-	while (it != end && (*it)->F < n->F)
-	{
-		++it;
-	}
-	start += clock() - s;
-	//std::cout << "Parcours de " << (i * 100) / _openList.size() << " % " << std::endl;
-#ifdef TRACE
-	tracing["findLowestInClosedList"] += clock() - start;
-	tracing["parcours"] += i;
-	tracing["total"] += _openList.size();
-#endif
+	std::multimap<int, Node*>::iterator it;
+	std::pair<std::multimap<int, Node*>::iterator, std::multimap<int, Node*>::iterator> range;
+	range = _openList2.equal_range(n->F);
+	for (it = range.first; it != range.second; ++it)
+		if (Node::Equals(n, (*it).second))
+		{
+			return true;
+		}
+		if (getClosedListCount() > 150000)
+			std::cout << "Time in isOpenList" << clock() - start << std::endl;
+	return false;
+}
+
+void AStar::createNewNode(Node * parent, Node * newNode)
+{
+	newNode->Parent = parent;
+	newNode->H = _heuristic->getH(parent, newNode);
+	newNode->F = newNode->G + newNode->F;
+	_openList2.insert(std::pair<int, Node *>(newNode->F, newNode));
 }
 
 void AStar::getPossibleMove(Node * n)
 {
 
-	
 	if (n->BlankX != 0 && n->Direction != Up)
 	{
 		Node * newNode = new Node(*n);
-		if (!isInClosedList(newNode))
+		if (!isInClosedList(newNode) && !isInOpenList(newNode))
 		{
 			newNode->State[n->BlankX][n->BlankY] = n->State[n->BlankX - 1][n->BlankY];
 			newNode->State[n->BlankX - 1][n->BlankY] = 0;
-			newNode->Parent = n;
 			newNode->Direction = Down;
 			newNode->BlankX = n->BlankX - 1;
-			newNode->H = _heuristic->getH(n, newNode);
-			newNode->F = newNode->G + newNode->H;
-			std::list<Node*>::iterator it = _openList.begin();
-			findLowestInClosedList(newNode, it);
-			_openList.insert(it,newNode);
-			//_openList.push_back(newNode);
+			createNewNode(n, newNode);
 		}
 	}
 
@@ -163,58 +153,39 @@ void AStar::getPossibleMove(Node * n)
 	{
 
 		Node * newNode = new Node(*n);
-		if (!isInClosedList(newNode))
+		if (!isInClosedList(newNode) && !isInOpenList(newNode))
 		{
 			newNode->State[n->BlankX][n->BlankY] = n->State[n->BlankX + 1][n->BlankY];
 			newNode->State[n->BlankX + 1][n->BlankY] = 0;
-			newNode->Parent = n;
 			newNode->Direction = Up;
 			newNode->BlankX = n->BlankX + 1;
-			newNode->H = _heuristic->getH(n, newNode);
-			newNode->F = newNode->G + newNode->H;
-			std::list<Node*>::iterator it = _openList.begin();
-			findLowestInClosedList(newNode, it);
-			_openList.insert(it,newNode);
-			//_openList.push_back(newNode);
+			createNewNode(n, newNode);
 		}
 	}
 	if (n->BlankY != 0  && n->Direction != Left)
 	{
 		Node * newNode = new Node(*n);
-		if (!isInClosedList(newNode))
+		if (!isInClosedList(newNode) && !isInOpenList(newNode))
 		{
 			newNode->State[n->BlankX][n->BlankY] = n->State[n->BlankX][n->BlankY - 1];
 			newNode->State[n->BlankX][n->BlankY - 1] = 0;
-			newNode->Parent = n;
 			newNode->Direction = Right;
 			newNode->BlankY = n->BlankY - 1;
-			newNode->H = _heuristic->getH(n, newNode);
-			newNode->F = newNode->G + newNode->H;
-			std::list<Node*>::iterator it = _openList.begin();
-			findLowestInClosedList(newNode, it);
-			_openList.insert(it,newNode);
-			//_openList.push_back(newNode);
+			createNewNode(n, newNode);
 		}
 	}
 	if (n->BlankY != _size - 1 && n->Direction != Right)
 	{
 		Node * newNode = new Node(*n);
-		if (!isInClosedList(newNode))
+		if (!isInClosedList(newNode) && !isInOpenList(newNode))
 		{
 			newNode->State[n->BlankX][n->BlankY] = n->State[n->BlankX][n->BlankY + 1];
 			newNode->State[n->BlankX][n->BlankY + 1] = 0;
-			newNode->Parent = n;
 			newNode->Direction = Left;
 			newNode->BlankY = n->BlankY + 1;
-			newNode->H = _heuristic->getH(n, newNode);
-			newNode->F = newNode->G + newNode->H;
-			std::list<Node*>::iterator it = _openList.begin();
-			findLowestInClosedList(newNode, it);
-			_openList.insert(it,newNode);
-			//_openList.push_back(newNode);
+			createNewNode(n, newNode);
 		}
 	}
-
 
 }
 
@@ -223,11 +194,7 @@ void AStar::getPossibleMove(Node * n)
 void AStar::solutionFound(Node* n)
 {
 	//found
-#ifdef _WIN32
 	_startTime = (clock() - _startTime);
-#else
-	_startTime = (time(0) - _startTime);
-#endif
 	int i = 0;
 	//Node * n = (*it);
 
@@ -256,7 +223,7 @@ void AStar::solutionFound(Node* n)
 		ofs << (*it) << std::endl;
 	}
 	ofs.close();
-#include <fstream>
+	#include <fstream>
 	std::ofstream oofs("Tracing.txt", std::ios_base::app);
 	oofs << _file << "\t:" << _startTime << " with " << i << "moves" << std::endl;
 	oofs.close();
@@ -330,36 +297,36 @@ int AStar::getMatrixValue(int y, int x)
 
 void AStar::showOpenList(bool onlyH)
 {
-	std::cout << std::endl << "Open List :" << std::endl << std::endl;
-	std::list<Node*>::iterator itopen = _openList.begin();
-	std::list<Node*>::iterator endopen = _openList.end();
-	while (itopen != endopen)
-	{
-		if (onlyH)
-			std::cout << (*(itopen++))->H << std::endl;
-		else
-			(*(itopen++))->show();
-	}
-	std::cout << "End of open List" << std::endl << std::endl;
+	//std::cout << std::endl << "Open List :" << std::endl << std::endl;
+	//std::list<Node*>::iterator itopen = _openList.begin();
+	//std::list<Node*>::iterator endopen = _openList.end();
+	//while (itopen != endopen)
+	//{
+	//	if (onlyH)
+	//		std::cout << (*(itopen++))->H << std::endl;
+	//	else
+	//		(*(itopen++))->show();
+	//}
+	//std::cout << "End of open List" << std::endl << std::endl;
 }
 
 void AStar::getBestNode(std::list<Node*>::iterator & current)
 {
-	int save = 99999999;
-	// Looking for CostLess Node
-	std::list<Node*>::iterator it = _openList.begin();
-	std::list<Node*>::iterator end = _openList.end();
-	for (; it != end ; ++it)
-	{
-		if ((*it)->H == 0)
-			solutionFound((*it));
-		else if ((*it)->H < save)
-		{
-			current = it;
-			save = (*it)->H;
-			//std::cout << (*it)->F << std::endl;
-		}
-	}
+	//int save = 99999999;
+	//// Looking for CostLess Node
+	//std::list<Node*>::iterator it = _openList.begin();
+	//std::list<Node*>::iterator end = _openList.end();
+	//for (; it != end ; ++it)
+	//{
+	//	if ((*it)->H == 0)
+	//		solutionFound((*it));
+	//	else if ((*it)->H < save)
+	//	{
+	//		current = it;
+	//		save = (*it)->H;
+	//		//std::cout << (*it)->F << std::endl;
+	//	}
+	//}
 	//std::cout << "Plus petit : " << save << std::endl;
 }
 
