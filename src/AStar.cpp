@@ -63,7 +63,6 @@ void AStar::run(char const * file)
 			found = true;
 			break;
 		}
-		std::cout << getClosedListCount() << std::endl;//"\r";
 	//start = clock();
 	//	if (getClosedListCount() % 5000 == 0)
 	//	{
@@ -231,9 +230,7 @@ void AStar::solutionFound(Node* n)
 	std::cout << "PASSWORD FOUND in " << i << " moves" << std::endl;
 	//std::cout << "[TIME] Closed list size\t\t" << _closedList.size() << std::endl;
 	//std::cout << "[SIZE] Two list size\t\t" << (_closedList.size() + _openList.size()) << std::endl;
-	system("pause");
 	//this->showClosedList();
-	exit(0);
 }
 
 Node* AStar::getSolution()
@@ -342,8 +339,8 @@ void AStar::showClosedList()
 int AStar::getClosedListCount()
 {
 	int count = 0;
-	std::map<std::pair<int, int>, std::list<Node*>>::iterator it = _closedList2.begin();
-	std::map<std::pair<int, int>, std::list<Node*>>::iterator end = _closedList2.end();
+	std::map<std::pair<int, int>, std::list<Node*> >::iterator it = _closedList2.begin();
+	std::map<std::pair<int, int>, std::list<Node*> >::iterator end = _closedList2.end();
 	for (; it != end; ++it)
 		count += (*it).second.size();
 	return count;

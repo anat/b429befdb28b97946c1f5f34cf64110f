@@ -8,7 +8,7 @@ class Manhattan : public IHeuristic
 {
 private:
 	int _size;
-	std::map<int, std::pair<int, int>> _helper;
+	std::map<int, std::pair<int, int> > _helper;
 public:
 	Manhattan(Node * solution);
 	~Manhattan(void);

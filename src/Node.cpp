@@ -1,4 +1,4 @@
-#include "..\include\Node.h"
+#include "Node.h"
 #include <iostream>
 
 Node::Node() : Parent(0)

@@ -5,7 +5,7 @@ class MisplacedTiles : public IHeuristic
 {
 private:
 	int _size;
-	std::map<int, std::pair<int, int>> _helper;
+	std::map<int, std::pair<int, int> > _helper;
 public:
 	MisplacedTiles(Node * solution);
 	~MisplacedTiles(void);
