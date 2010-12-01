@@ -130,7 +130,7 @@ void AStar::createNewNode(Node * parent, Node * newNode)
 	newNode->Parent = parent;
 	newNode->H = _heuristic->getH(parent, newNode);
 	newNode->F = newNode->G + newNode->F;
-	_openList2.insert(std::pair<int, Node *>(newNode->F, newNode));
+	_openList2.insert(std::pair<int, Node *>(newNode->H, newNode));
 }
 
 void AStar::getPossibleMove(Node * n)
@@ -211,8 +211,8 @@ void AStar::solutionFound(Node* n)
 		i++;
 	}
 
-	ofs << "[MOVES] : " << i <</* " Compute time : " << _startTime << " Milliseconds" <<*/ std::endl;
-
+	std::cout << "[MOVES] : " << i << std::endl;
+	ofs << "[MOVES] : " << i << std::endl;
 	std::list<const char *>::const_iterator it = solution.begin();
 	std::list<const char *>::const_iterator end = solution.end();
 
