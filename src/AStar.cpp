@@ -5,17 +5,17 @@
 #include "Manhattan.h"
 #include "MisplacedTiles.h"
 
-AStar::AStar(int size, int** initialState, IHeuristic * strategy) : 
+
+AStar::AStar(unsigned char size, unsigned char* initialState, IHeuristic * strategy) : 
 _matrixHelper(0),
 _startTime(clock())
 {
+	Node::Size = size;
 	_size = size;
-	Node* n = new Node();
-	n->State = initialState;
-	n->Size = _size;
-	n->setBlank();
+	_initialState = new Node();
+	_initialState->State = initialState;
+	_initialState->setBlank();
 
-	_initialState = n;
 	_solution = getSolution();
 	_heuristic = strategy;
 	_heuristic->setSolution(_solution);
@@ -30,11 +30,11 @@ AStar::~AStar(void)
 
 void AStar::run(char const * file)
 {
-
 	_file = file;
 	// Add the first node to the open list
 	getPossibleMove(_initialState);
-	_closedList2[std::pair<int,int>(_initialState->BlankX, _initialState->BlankY)].push_back(_initialState);
+	
+	_closedList2[_initialState->Blank].push_back(_initialState);
 
 	std::multimap<int, Node*>::iterator current;
 
@@ -43,8 +43,7 @@ void AStar::run(char const * file)
 	{
 		if (_openList2.size() == 0)
 			break;
-		else
-			current = _openList2.begin();
+		current = _openList2.begin();
 
 		if ((*current).second->H == 0)
 		{
@@ -53,10 +52,8 @@ void AStar::run(char const * file)
 		}
 		getPossibleMove((*current).second);
 		// Move the CostLess Node to closedList
-		_closedList2[std::pair<int, int>((*current).second->BlankX, (*current).second->BlankY)].push_back((*current).second);
+		_closedList2[(*current).second->Blank].push_back((*current).second);
 		_openList2.erase(current);
-		
-		//showInfo();
 	}
 	if (found)
 		solutionFound((*current).second);
@@ -77,24 +74,23 @@ void AStar::createNewNode(Node * parent, Node * newNode)
 
 void AStar::getPossibleMove(Node * n)
 {
-
-	if (n->BlankX != 0 && n->Direction != Up)
+	if (Node::getX(n->Blank) != 0 && n->Direction != Up)
 	{
 		Node * newNode = new Node(*n, Down);
 		createNewNode(n, newNode);
 	}
 
-	if (n->BlankX != _size - 1 && n->Direction != Down)
+	if (Node::getX(n->Blank) != _size - 1 && n->Direction != Down)
 	{
 		Node * newNode = new Node(*n, Up);
 		createNewNode(n, newNode);
 	}
-	if (n->BlankY != 0  && n->Direction != Left)
+	if (Node::getY(n->Blank) != 0  && n->Direction != Left)
 	{
 		Node * newNode = new Node(*n, Right);
 		createNewNode(n, newNode);
 	}
-	if (n->BlankY != _size - 1 && n->Direction != Right)
+	if (Node::getY(n->Blank) != _size - 1 && n->Direction != Right)
 	{
 		Node * newNode = new Node(*n, Left);
 		createNewNode(n, newNode);
@@ -103,11 +99,11 @@ void AStar::getPossibleMove(Node * n)
 
 bool AStar::isInClosedList(Node* n)
 {
-	if (_closedList2[std::pair<int, int>(n->BlankX, n->BlankY)].size() == 0)
+	if (_closedList2[n->Blank].size() == 0)
 		return false;
 
-	std::list<Node*>::iterator itclosed = _closedList2[std::pair<int, int>(n->BlankX, n->BlankY)].begin();
-	std::list<Node*>::iterator endclosed = _closedList2[std::pair<int, int>(n->BlankX, n->BlankY)].end();
+	std::list<Node*>::iterator itclosed = _closedList2[n->Blank].begin();
+	std::list<Node*>::iterator endclosed = _closedList2[n->Blank].end();
 	while (itclosed != endclosed && Node::Equals((*itclosed), n) == false)
 		itclosed++;
 
@@ -163,21 +159,23 @@ void AStar::solutionFound(Node* n)
 Node* AStar::getSolution()
 {
 	int** mat = fillMatrix();
-	int** sol = new int*[_size];
-
-	for (int i = 0 ; i < _size ; i++)
-		sol[i] = new int[_size];
+	unsigned char* sol = new unsigned char[(_size * _size) + 1];
+	int z = 0;
 	for (int i = 0; i < _size ; i++)
-		for (int j = 0; j < _size ; j++) 
-			sol[i][j] = mat[i][j];
+	{
+		for (int j = 0; j < _size ; j++)
+		{
+			sol[z] = mat[i][j];
+			z++;
+		}
+	}
 
 	Node * n = new Node();
 	n->Size = _size;
 	n->State = sol;
-	for (int i = 0 ; i < _size ; i++)
-		for (int j = 0 ; j < _size ; j++)
-			if (n->State[i][j] == _size * _size)
-				n->State[i][j] = BLANK;
+	for (int i = 0 ; i < (_size *_size) ; i++)
+			if (n->State[i] == _size * _size)
+				n->State[i] = BLANK;
 	return n;
 }
 
@@ -222,8 +220,8 @@ int AStar::getMatrixValue(int y, int x)
 int AStar::getClosedListCount()
 {
 	int count = 0;
-	std::map<std::pair<int, int>, std::list<Node*> >::iterator it = _closedList2.begin();
-	std::map<std::pair<int, int>, std::list<Node*> >::iterator end = _closedList2.end();
+	std::map<unsigned char, std::list<Node*> >::iterator it = _closedList2.begin();
+	std::map<unsigned char, std::list<Node*> >::iterator end = _closedList2.end();
 	for (; it != end; ++it)
 		count += (*it).second.size();
 	return count;

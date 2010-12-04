@@ -12,48 +12,42 @@ Node::Node() : Parent(0)
 // Constructor for other's nodes
 Node::Node(Node const &copy, TDirection dir)
 {
-	this->Size = copy.Size;
 	this->Direction = dir;
-	this->State = new int*[copy.Size];
+	this->State = new unsigned char[(Node::Size * Node::Size) + 1];
+	this->State[Node::Size * Node::Size] = 0;
 
-	for (int i = 0 ; i < copy.Size ; i++)
+	for (int i = 0 ; i <= Node::Size * Node::Size ; i++)
 	{
-		this->State[i] = new int[copy.Size];
-		for (int j = 0 ; j < copy.Size ; j++)
-			this->State[i][j] =	copy.State[i][j];
+		this->State[i] = copy.State[i];
 	}
 
-	this->BlankX = (dir == Down ? copy.BlankX - 1 :		(dir == Up ? copy.BlankX + 1 : copy.BlankX)		);
-	this->BlankY = (dir == Right ? copy.BlankY - 1 :	(dir == Left ? copy.BlankY + 1 : copy.BlankY)	);
-
-	//std::cout << "From " <<  copy.State[this->BlankX][this->BlankY] << " To " << this->State[copy.BlankX][copy.BlankX] << std::endl;
-	this->State[copy.BlankX][copy.BlankY] = copy.State[this->BlankX][this->BlankY];
-	this->State[this->BlankX][this->BlankY] = 0;
+	this->Blank = (dir == Down ? copy.Blank - Node::Size : (dir == Up ? copy.Blank + Node::Size : (dir == Right ? getPos(getX(copy.Blank), getY(copy.Blank) - 1) :	getPos(getX(copy.Blank), getY(copy.Blank) + 1)	)	)		);
+	if (this->Blank > Size * Size)
+	{
+		exit(0);
+	}
+	this->State[copy.Blank] = copy.State[this->Blank];
+	this->State[this->Blank] = BLANK;
 	this->G = copy.G + 1;
 }
 
 bool Node::Equals(Node *node1, Node *node2)
 {
-	for (int i = 0 ; i < node1->Size ; i++)
-		for (int j = 0 ; j < node2->Size ; j++)
-			if (node1->State[i][j] != node2->State[i][j])
-				return false;
+	for (int i = 0 ; i < Node::Size * Node::Size ; i++)
+		if (node1->State[i] != node2->State[i])
+			return false;
 	return true;
 }
 
 void Node::setBlank()
 {
-	for (int i = 0 ; i < Size ; i++)
+	for (int i = 0 ; i < Node::Size * Node::Size ; i++)
 	{
-		for (int j = 0 ; j < Size ; j++)
-		{
-			if (this->State[i][j] == BLANK)
+			if (this->State[i] == BLANK)
 			{
-				this->BlankX = i;
-				this->BlankY = j;
+				this->Blank = i;
 				return;
 			}
-		}
 	}
 }
 
@@ -74,16 +68,14 @@ void Node::show()
 {
 	std::cout << "-----------Node-------------------------------" << std::endl;
 	std::cout << "\taddr : " << std::hex << this << "  -  parent : " << std::hex << this->Parent << std::endl;
-	std::cout << "\tdir = " << getDirByEnum() << std::endl << "\tBlank x=" << BlankX << " y=" << BlankY << std::endl;
-	std::cout << "\tG=" << G << "\rH=" << H << std::endl;
-	for (int aa = 0; aa < this->Size; aa++)
+	std::cout << "\tdir = " << getDirByEnum() << std::endl << "\tBlank =" << std::dec << (int)Blank << std::endl;
+	std::cout << "\tG=" << std::dec << G << "\rH=" << std::dec << H << std::endl;
+	for (int aa = 0; aa < (Node::Size * Node::Size); aa++)
 	{
-		std::cout << "\t";
-		for (int bb = 0; bb < this->Size; bb++)
-		{
-			std::cout << std::dec << this->State[aa][bb] << "\t";
-		}
-		std::cout << std::endl;
+		if (aa != 0)
+			if (getX(aa) != getX(aa - 1))
+				std::cout << std::endl;
+		std::cout << std::dec << (int)this->State[aa] << "\t";
 	}
 	std::cout << std::endl;
 	std::cout << "--------///Node-------------------------------" << std::endl;

@@ -2,6 +2,8 @@
 #include "Node.h"
 #include <iostream>
 
+unsigned char Node::Size;
+
 Manhattan::Manhattan()
 {
 	std::cout << "Strategy : Manhattan Heuristic" << std::endl;
@@ -13,30 +15,22 @@ Manhattan::~Manhattan(void)
 
 int Manhattan::getH(Node * beforeState, Node* currentState)
 {
-	//std::cout << std::endl << "PARENT" << std::endl;
-	//if (beforeState)
- // beforeState->show();
- // currentState->show();
 	int cost = 0;
-	for (int i = 0 ; i < _size ; i++)
+	for (int i = 0 ; i < (_size * _size) ; i++)
 	{
-		for (int j = 0 ; j < _size ; j++)
-		{
-			int k = this->_helper[currentState->State[i][j]].first;
-			int l = this->_helper[currentState->State[i][j]].second;
-			cost += (k > i ? k - i : i - k);
-			cost += (l > j ? l - j : j - l);
-		}
+			int k = this->_helper[currentState->State[i]].first;
+			int l = this->_helper[currentState->State[i]].second;
+			int x = Node::getX(i);
+			int y = Node::getY(i);
+			cost += (k > x ? k - x : x - k);
+			cost += (l > y ? l - y : y - l);
 	}
-	//std::cout << n->G << std::endl;
-	//cost += n->G;
 	return cost;
 }
 
 void Manhattan::setSolution(Node *solution)
 {
-	_size = solution->Size;
-	for (int i = 0 ; i < _size ; i++)
-		for (int j = 0 ; j < _size ; j++)
-			this->_helper[solution->State[i][j]] = std::pair<int, int>(i, j);
+	_size = Node::Size;
+	for (int i = 0 ; i < (Node::Size * Node::Size) ; i++)
+		this->_helper[solution->State[i]] = std::pair<int, int>(Node::getX(i), Node::getY(i));
 }

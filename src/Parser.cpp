@@ -12,7 +12,7 @@ Parser::Parser(std::string const & file) : _ifs(file.c_str()), _size(0), 	_state
 	}
 }
 
-int** Parser::readInitialState()
+unsigned char* Parser::readInitialState()
 {
 	std::string line;
 
@@ -26,10 +26,9 @@ int** Parser::readInitialState()
 		std::cerr << "Bad \"Taquin\" file : Couldn't get size" << std::endl;
 		return 0;
 	}
-	int** base = new int*[_size];
-	for (int i = 0 ; i < _size ; i++)
-		base[i] = new int[_size];
-
+	unsigned char* base = new unsigned char[(_size * _size) + 1];
+	base[_size * _size] = 0;
+	int k = 0;
 	int x = 0;
 	int y;
 
@@ -43,7 +42,11 @@ int** Parser::readInitialState()
 		while (std::getline(lineStream, cell, ' '))
 		{
 			std::istringstream is(cell);
-			is >> base[x][y++];
+			int current;
+			is >> current;
+			base[k] = current;
+			y++;
+			k++;
 		}
 		if (y != _size)
 		{
@@ -54,19 +57,22 @@ int** Parser::readInitialState()
 	}
 	if (!this->validateState(base))
 		return 0;
+
+	for (int i = 0; i < _size * _size; i++)
+		if (base[i] == 0)
+			base[i] = 255;
 	return base;
 }
 
-bool Parser::validateState(int ** base)
+bool Parser::validateState(unsigned char* base)
 {
 	bool err = false;
 
 	// Create an element list
-	std::list<int> elements;
+	std::list<unsigned char> elements;
 
-	for (int i = 0 ; i < _size ; i++)
-		for (int j = 0 ; j < _size ; j++)
-			elements.push_back(base[i][j]);
+	for (int i = 0 ; i <= (_size * _size) ; i++)
+			elements.push_back(base[i]);
 
 	// Check if first is the good number
 	elements.sort();
@@ -80,7 +86,6 @@ bool Parser::validateState(int ** base)
 	if (*(elements.begin()) != (_size * _size) - 1)
 		err = true;
 
-	std::cout << err << std::endl;
 	// Check if there's no doubled values
 	elements.unique();
 
@@ -95,21 +100,19 @@ bool Parser::validateState(int ** base)
 	return true;
 }
 
-int** Parser::getInitialState()
+unsigned char* Parser::getInitialState()
 {
 	return _state;
 }
 
 
-int Parser::getSize()
+unsigned char Parser::getSize()
 {
 	return _size;
 }
 
 void Parser::getSolution(std::list<std::string *> & solution)
 {
-	
-	
 	std::cout << "ouvre :" << std::string(_file + ".solution").c_str() << std::endl;
 	std::ifstream ifs(std::string(_file + ".solution").c_str());
 

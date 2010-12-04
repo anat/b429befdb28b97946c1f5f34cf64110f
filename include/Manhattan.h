@@ -7,8 +7,8 @@
 class Manhattan : public IHeuristic
 {
 private:
-	int _size;
-	std::map<int, std::pair<int, int> > _helper;
+	char _size;
+	std::map<unsigned char, std::pair<unsigned char, unsigned char> > _helper;
 public:
 	Manhattan();
 	~Manhattan(void);

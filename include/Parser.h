@@ -11,15 +11,15 @@ class Parser
 private:
 	std::ifstream	_ifs;
 	int				_size;
-	int**			_state;
+	unsigned char*	_state;
 	std::string		_file;
 public:
 	Parser(std::string const &);
 	~Parser(void);
-	int** readInitialState();
-	int** getInitialState();
-	bool validateState(int ** base);
-	int getSize();
+	unsigned char* readInitialState();
+	unsigned char* getInitialState();
+	bool validateState(unsigned char* base);
+	unsigned char getSize();
 	void getSolution(std::list<std::string *> & solution);
 };
 

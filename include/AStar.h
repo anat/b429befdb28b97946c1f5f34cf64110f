@@ -14,7 +14,7 @@ private:
 	Node* _solution;
 	int	_size;
 	std::multimap<int, Node *> _openList2;
-	std::map<std::pair<int, int>, std::list<Node*> > _closedList2;
+	std::map<unsigned char, std::list<Node*> > _closedList2;
 	int** _matrixHelper;
 	char const * _file;
 	clock_t _startTime;
@@ -22,7 +22,7 @@ private:
 	IHeuristic* _heuristic;
 
 public:
-	AStar(int size, int** initialState, IHeuristic * strategy);
+	AStar(unsigned char size, unsigned char* initialState, IHeuristic * strategy);
 	void getPossibleMove(Node * n);
 	~AStar(void);
 	void run(char const * file);

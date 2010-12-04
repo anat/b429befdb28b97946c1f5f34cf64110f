@@ -7,8 +7,8 @@
 
 int		main(int ac, char** av)
 {
-  if (ac == 1)
-    {
+  //if (ac == 1)
+  //  {
 	char const * file;
 	//file = av[1];
 	//file = "niv1-3x3.taquin";
@@ -25,16 +25,16 @@ int		main(int ac, char** av)
 	//file = "niv12-4x4.taquin";
 	//file = "niv13-4x4.taquin";
 	Parser p(file);
-	int** base = p.getInitialState();
+	unsigned char * base = p.getInitialState();
 	if (base)
 	{
-		Manhattan* strategy = new Manhattan();
-		AStar a(p.getSize(), p.getInitialState(), strategy);
-		a.run(file);
+	Manhattan* strategy = new Manhattan();
+	AStar a(p.getSize(), p.getInitialState(), strategy);
+	a.run(file);
 	}
-    }
-  else
-    {
-      std::cerr << "Please select a map file" << std::endl;
-    }
+	//}
+ // else
+ //   {
+ //     std::cerr << "Please select a map file" << std::endl;
+ //   }
 }
