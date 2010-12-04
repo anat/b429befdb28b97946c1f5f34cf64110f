@@ -6,10 +6,10 @@
 class IHeuristic
 {
 public:
-	IHeuristic(){};
-	IHeuristic(Node * solution);
+	IHeuristic() {};
 	virtual ~IHeuristic(void) {};
 	virtual int getH(Node * beforeState, Node* currentState) = 0;
+	virtual void setSolution(Node *solution) = 0;
 };
 
 #endif

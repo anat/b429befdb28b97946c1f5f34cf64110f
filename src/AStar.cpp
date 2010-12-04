@@ -3,10 +3,9 @@
 #include <fstream>
 #include <map>
 #include "Manhattan.h"
-#include "Manhattan9.h"
 #include "MisplacedTiles.h"
 
-AStar::AStar(int size, int** initialState) : 
+AStar::AStar(int size, int** initialState, IHeuristic * strategy) : 
 _matrixHelper(0),
 _startTime(clock())
 {
@@ -15,12 +14,13 @@ _startTime(clock())
 	n->State = initialState;
 	n->Size = _size;
 	n->setBlank();
-	n->G = 0;
+
 	_initialState = n;
 	_solution = getSolution();
-	_heuristic = new Manhattan9(_solution);
-	n->H = _heuristic->getH(0, n);
-	n->F = n->G + n->H;
+	_heuristic = strategy;
+	_heuristic->setSolution(_solution);
+	_initialState->H = _heuristic->getH(0, _initialState);
+	_initialState->F = _initialState->G + _initialState->H;
 }
 
 AStar::~AStar(void)
@@ -35,9 +35,9 @@ void AStar::run(char const * file)
 	// Add the first node to the open list
 	getPossibleMove(_initialState);
 	_closedList2[std::pair<int,int>(_initialState->BlankX, _initialState->BlankY)].push_back(_initialState);
-	
+
 	std::multimap<int, Node*>::iterator current;
-	
+
 	bool found = false;
 	while (1)
 	{
@@ -51,12 +51,12 @@ void AStar::run(char const * file)
 			found = true;
 			break;
 		}
-
 		getPossibleMove((*current).second);
 		// Move the CostLess Node to closedList
 		_closedList2[std::pair<int, int>((*current).second->BlankX, (*current).second->BlankY)].push_back((*current).second);
 		_openList2.erase(current);
-		showInfo();
+		
+		//showInfo();
 	}
 	if (found)
 		solutionFound((*current).second);
@@ -66,10 +66,13 @@ void AStar::run(char const * file)
 
 void AStar::createNewNode(Node * parent, Node * newNode)
 {
-	newNode->Parent = parent;
-	newNode->H = _heuristic->getH(parent, newNode);
-	newNode->F = newNode->G + newNode->F;
-	_openList2.insert(std::pair<int, Node *>(newNode->H, newNode));
+	if (!isInOpenList(newNode) && !isInClosedList(newNode))
+	{
+		newNode->Parent = parent;
+		newNode->H = _heuristic->getH(parent, newNode);
+		newNode->F = newNode->G + newNode->H;
+		_openList2.insert(std::pair<int, Node *>(newNode->F, newNode));
+	}
 }
 
 void AStar::getPossibleMove(Node * n)
@@ -77,55 +80,25 @@ void AStar::getPossibleMove(Node * n)
 
 	if (n->BlankX != 0 && n->Direction != Up)
 	{
-		Node * newNode = new Node(*n);
-		if (!isInClosedList(newNode) && !isInOpenList(newNode))
-		{
-			newNode->State[n->BlankX][n->BlankY] = n->State[n->BlankX - 1][n->BlankY];
-			newNode->State[n->BlankX - 1][n->BlankY] = 0;
-			newNode->Direction = Down;
-			newNode->BlankX = n->BlankX - 1;
-			createNewNode(n, newNode);
-		}
+		Node * newNode = new Node(*n, Down);
+		createNewNode(n, newNode);
 	}
 
 	if (n->BlankX != _size - 1 && n->Direction != Down)
 	{
-
-		Node * newNode = new Node(*n);
-		if (!isInClosedList(newNode) && !isInOpenList(newNode))
-		{
-			newNode->State[n->BlankX][n->BlankY] = n->State[n->BlankX + 1][n->BlankY];
-			newNode->State[n->BlankX + 1][n->BlankY] = 0;
-			newNode->Direction = Up;
-			newNode->BlankX = n->BlankX + 1;
-			createNewNode(n, newNode);
-		}
+		Node * newNode = new Node(*n, Up);
+		createNewNode(n, newNode);
 	}
 	if (n->BlankY != 0  && n->Direction != Left)
 	{
-		Node * newNode = new Node(*n);
-		if (!isInClosedList(newNode) && !isInOpenList(newNode))
-		{
-			newNode->State[n->BlankX][n->BlankY] = n->State[n->BlankX][n->BlankY - 1];
-			newNode->State[n->BlankX][n->BlankY - 1] = 0;
-			newNode->Direction = Right;
-			newNode->BlankY = n->BlankY - 1;
-			createNewNode(n, newNode);
-		}
+		Node * newNode = new Node(*n, Right);
+		createNewNode(n, newNode);
 	}
 	if (n->BlankY != _size - 1 && n->Direction != Right)
 	{
-		Node * newNode = new Node(*n);
-		if (!isInClosedList(newNode) && !isInOpenList(newNode))
-		{
-			newNode->State[n->BlankX][n->BlankY] = n->State[n->BlankX][n->BlankY + 1];
-			newNode->State[n->BlankX][n->BlankY + 1] = 0;
-			newNode->Direction = Left;
-			newNode->BlankY = n->BlankY + 1;
-			createNewNode(n, newNode);
-		}
+		Node * newNode = new Node(*n, Left);
+		createNewNode(n, newNode);
 	}
-
 }
 
 bool AStar::isInClosedList(Node* n)
@@ -137,7 +110,7 @@ bool AStar::isInClosedList(Node* n)
 	std::list<Node*>::iterator endclosed = _closedList2[std::pair<int, int>(n->BlankX, n->BlankY)].end();
 	while (itclosed != endclosed && Node::Equals((*itclosed), n) == false)
 		itclosed++;
-	
+
 	if (itclosed != endclosed)
 		return true;
 	return false;
@@ -168,8 +141,11 @@ void AStar::solutionFound(Node* n)
 		i++;
 	}
 
-	std::cout << "[MOVES] : " << i << std::endl;
-	ofs << "[MOVES] : " << i << std::endl;
+	ofs << "time=" << (double)_startTime / CLOCKS_PER_SEC <<  
+			"&moves=" << i  << 
+			"&complexity_in_time=" << 
+			"&complexity_in_size" << std::endl;
+
 	std::list<const char *>::const_iterator it = solution.begin();
 	std::list<const char *>::const_iterator end = solution.end();
 
@@ -178,8 +154,10 @@ void AStar::solutionFound(Node* n)
 		ofs << (*it) << std::endl;
 	}
 	ofs.close();
-	std::cout << "[TIME] Closed list size\t\t" << getClosedListCount() << std::endl;
-	std::cout << "[SIZE] Two list size\t\t" << (getClosedListCount() + _openList2.size()) << std::endl;
+	std::cout << "[COMPUTE TIME]\t\t" << (double)_startTime / CLOCKS_PER_SEC << " sec" << std::endl;
+	std::cout << "[MOVES]\t\t\t" << i << std::endl;
+	std::cout << "[TIME] Closed list size\t" << getClosedListCount() << std::endl;
+	std::cout << "[SIZE] Two list size\t" << (getClosedListCount() + _openList2.size()) << std::endl;
 }
 
 Node* AStar::getSolution()

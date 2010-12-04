@@ -1,23 +1,34 @@
 #include "Node.h"
 #include <iostream>
 
+// Constructor for the first node
 Node::Node() : Parent(0)
 {
+	this->G = 0;
+	this->Direction = None;
+	this->F = 0;
 }
 
-Node::Node(Node const &copy)
+// Constructor for other's nodes
+Node::Node(Node const &copy, TDirection dir)
 {
 	this->Size = copy.Size;
-	this->Parent = copy.Parent;
+	this->Direction = dir;
 	this->State = new int*[copy.Size];
+
 	for (int i = 0 ; i < copy.Size ; i++)
 	{
 		this->State[i] = new int[copy.Size];
 		for (int j = 0 ; j < copy.Size ; j++)
 			this->State[i][j] =	copy.State[i][j];
 	}
-	this->BlankX = copy.BlankX;
-	this->BlankY = copy.BlankY;
+
+	this->BlankX = (dir == Down ? copy.BlankX - 1 :		(dir == Up ? copy.BlankX + 1 : copy.BlankX)		);
+	this->BlankY = (dir == Right ? copy.BlankY - 1 :	(dir == Left ? copy.BlankY + 1 : copy.BlankY)	);
+
+	//std::cout << "From " <<  copy.State[this->BlankX][this->BlankY] << " To " << this->State[copy.BlankX][copy.BlankX] << std::endl;
+	this->State[copy.BlankX][copy.BlankY] = copy.State[this->BlankX][this->BlankY];
+	this->State[this->BlankX][this->BlankY] = 0;
 	this->G = copy.G + 1;
 }
 

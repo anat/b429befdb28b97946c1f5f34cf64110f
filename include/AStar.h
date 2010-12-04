@@ -22,7 +22,7 @@ private:
 	IHeuristic* _heuristic;
 
 public:
-	AStar(int size, int** initialState);
+	AStar(int size, int** initialState, IHeuristic * strategy);
 	void getPossibleMove(Node * n);
 	~AStar(void);
 	void run(char const * file);

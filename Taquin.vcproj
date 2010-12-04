@@ -176,10 +176,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\Manhattan9.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\src\MisplacedTiles.cpp"
 				>
 			</File>
@@ -211,10 +207,6 @@
 			</File>
 			<File
 				RelativePath=".\include\Manhattan.h"
-				>
-			</File>
-			<File
-				RelativePath=".\include\Manhattan9.h"
 				>
 			</File>
 			<File

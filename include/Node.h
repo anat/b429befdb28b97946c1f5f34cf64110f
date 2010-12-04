@@ -27,7 +27,7 @@ public:
 	int BlankX;
 	int BlankY;
 	Node();
-	Node(Node const &);
+	Node(Node const &n, TDirection direction);
 	static bool Equals(Node *node1, Node *node2);
 	void setBlank();
 	void show();
