@@ -21,6 +21,7 @@ _startTime(clock())
 	_heuristic->setSolution(_solution);
 	_initialState->H = _heuristic->getH(0, _initialState);
 	_initialState->F = _initialState->G + _initialState->H;
+	_initialState->show();
 }
 
 AStar::~AStar(void)
@@ -33,8 +34,10 @@ void AStar::run(char const * file)
 	_file = file;
 	// Add the first node to the open list
 	getPossibleMove(_initialState);
-	
-	_closedList2[_initialState->Blank].push_back(_initialState);
+	_globalHashMap[(const char *)_initialState->State] = _initialState;
+	//_closedHashMap[(const char *)_initialState->State] = _initialState;
+	//_openHashMap.insert(std::pair<unsigned char *, Node*>(_initialState->State, _initialState));
+//_closedList2[_initialState->Blank].push_back(_initialState);
 
 	std::multimap<int, Node*>::iterator current;
 
@@ -52,24 +55,59 @@ void AStar::run(char const * file)
 		}
 		getPossibleMove((*current).second);
 		// Move the CostLess Node to closedList
-		_closedList2[(*current).second->Blank].push_back((*current).second);
+		//_closedList2[(*current).second->Blank].push_back((*current).second);
+		//if (_openHashMap.erase((const char *)((*current).second->State)) == 0)
+		//{
+		//	std::cout << "Je peux pas supprimer de la openList" << std::endl;	
+		//	exit(0);
+		//}		
+		//_closedHashMap[(const char *)((*current).second->State)] = (*current).second;
 		_openList2.erase(current);
+
+		//showInfo();
 	}
 	if (found)
 		solutionFound((*current).second);
 	else
-		std::cout << "Solution not found" << std::endl;
+		solutionFound(0);
+
 }
 
 void AStar::createNewNode(Node * parent, Node * newNode)
 {
-	if (!isInOpenList(newNode) && !isInClosedList(newNode))
+	//if (_openHashMap.find((const char *)newNode->State) == _openHashMap.end() && _closedHashMap.find((const char *)newNode->State) == _closedHashMap.end())//!isInOpenList(newNode) && !isInClosedList(newNode))
+	if (_globalHashMap.find((const char *)newNode->State) == _globalHashMap.end())
 	{
 		newNode->Parent = parent;
 		newNode->H = _heuristic->getH(parent, newNode);
 		newNode->F = newNode->G + newNode->H;
 		_openList2.insert(std::pair<int, Node *>(newNode->F, newNode));
+		//_openHashMap[(const char *)(newNode->State)] = newNode;
+		_globalHashMap[(const char *)newNode->State] = newNode;
+		//_openHashMap.insert(std::pair<unsigned char *, Node*>(newNode->State, newNode));
 	}
+	//else
+	//{
+	//	if (_openHashMap.find((const char *)newNode->State) != _openHashMap.end())
+	//		if (Node::Equals(_openHashMap[(const char *)newNode->State], newNode))
+	//			;//std::cout << "Effectivement" << std::endl;
+	//		else
+	//		{
+	//			std::cout << "COLLISION!" << std::endl;
+	//			newNode->show();
+	//			_openHashMap[(const char *)newNode->State]->show();
+	//			//_openHashMap.
+	//			exit(0);
+	//		}
+	//	else
+	//		if (Node::Equals(_closedHashMap[(const char *)newNode->State], newNode))
+	//			;//std::cout << "Effectivement" << std::endl;
+	//		else
+	//		{
+	//			std::cout << "COLLISION!" << std::endl;
+	//			exit(0);
+	//		}
+	//}
 }
 
 void AStar::getPossibleMove(Node * n)
@@ -97,35 +135,17 @@ void AStar::getPossibleMove(Node * n)
 	}
 }
 
-bool AStar::isInClosedList(Node* n)
-{
-	if (_closedList2[n->Blank].size() == 0)
-		return false;
-
-	std::list<Node*>::iterator itclosed = _closedList2[n->Blank].begin();
-	std::list<Node*>::iterator endclosed = _closedList2[n->Blank].end();
-	while (itclosed != endclosed && Node::Equals((*itclosed), n) == false)
-		itclosed++;
-
-	if (itclosed != endclosed)
-		return true;
-	return false;
-}
-
-bool AStar::isInOpenList(Node * n)
-{
-	std::multimap<int, Node*>::iterator it;
-	std::pair<std::multimap<int, Node*>::iterator, std::multimap<int, Node*>::iterator> range;
-	range = _openList2.equal_range(n->F);
-	for (it = range.first; it != range.second; ++it)
-		if (Node::Equals(n, (*it).second))
-			return true;
-	return false;
-}
-
 void AStar::solutionFound(Node* n)
 {
 	_startTime = (clock() - _startTime);
+	if (n == 0)
+	{
+		std::cout << "[COMPUTE TIME]\t\t" << (double)_startTime / CLOCKS_PER_SEC << " sec" << std::endl;
+		std::cout << "[TIME] Closed list size\t" << getClosedListCount() << std::endl;
+		std::cout << "[SIZE] Two list size\t" << (getClosedListCount() + _openList2.size()) << std::endl;
+		std::cout << "Solution not found" << std::endl;
+		return;
+	}
 	int i = 0;
 	std::string outputfile(_file + std::string(".solution"));
 	std::ofstream ofs(outputfile.c_str());
@@ -220,18 +240,22 @@ int AStar::getMatrixValue(int y, int x)
 int AStar::getClosedListCount()
 {
 	int count = 0;
-	std::map<unsigned char, std::list<Node*> >::iterator it = _closedList2.begin();
-	std::map<unsigned char, std::list<Node*> >::iterator end = _closedList2.end();
-	for (; it != end; ++it)
-		count += (*it).second.size();
+	//std::map<unsigned char, std::list<Node*> >::iterator it = _closedList2.begin();
+	//std::map<unsigned char, std::list<Node*> >::iterator end = _closedList2.end();
+	//for (; it != end; ++it)
+	//	count += (*it).second.size();
 	return count;
 }
 
 void AStar::showInfo()
 {
-	if (getClosedListCount() % 5000 == 0)
-	{
-		std::cout << "Analysed : " << getClosedListCount() << std::endl;
-		std::cout << "Temps courant : " << clock() - _startTime << std::endl;
-	}
+	//if (_globalHashMap.size() % 50000 == 0)
+	//{
+	//	std::cout << "Open List :" << _openList2.size() << std::endl;
+	//	std::cout << "Closed List : " << getClosedListCount() << std::endl;
+	//	std::cout << "InOpen hash MAP : " << _openHashMap.size() << std::endl;
+	//	std::cout << "InClosed hash MAP : " << _closedHashMap.size() << std::endl;
+	//	//std::cout << (*_openHashMap.begin()).second->Blank << std::endl;
+	//	std::cout << "Temps courant : " << clock() - _startTime << std::endl;
+	//}
 }

@@ -26,6 +26,11 @@ unsigned char* Parser::readInitialState()
 		std::cerr << "Bad \"Taquin\" file : Couldn't get size" << std::endl;
 		return 0;
 	}
+	if (_size > 15)
+	{
+		std::cerr << "Bad \"Taquin\" file : Size is greater than 15, can't process" << std::endl;
+		return 0;
+	}
 	unsigned char* base = new unsigned char[(_size * _size) + 1];
 	base[_size * _size] = 0;
 	int k = 0;
