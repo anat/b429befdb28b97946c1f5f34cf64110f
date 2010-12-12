@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Taquin", "Taquin.vcproj", "{8819662F-454C-43F3-B558-D7C756DED888}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Game", "Game\Game.vcproj", "{A281EC9A-0ABC-415A-AD04-1DC42F496C0B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8819662F-454C-43F3-B558-D7C756DED888}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8819662F-454C-43F3-B558-D7C756DED888}.Debug|Win32.Build.0 = Debug|Win32
+		{8819662F-454C-43F3-B558-D7C756DED888}.Release|Win32.ActiveCfg = Release|Win32
+		{8819662F-454C-43F3-B558-D7C756DED888}.Release|Win32.Build.0 = Release|Win32
+		{A281EC9A-0ABC-415A-AD04-1DC42F496C0B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A281EC9A-0ABC-415A-AD04-1DC42F496C0B}.Debug|Win32.Build.0 = Debug|Win32
+		{A281EC9A-0ABC-415A-AD04-1DC42F496C0B}.Release|Win32.ActiveCfg = Release|Win32
+		{A281EC9A-0ABC-415A-AD04-1DC42F496C0B}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
