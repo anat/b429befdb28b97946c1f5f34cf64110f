@@ -11,19 +11,19 @@ int		main(int ac, char** av)
   //  {
 	char const * file;
 	//file = av[1];
-	//file = "niv1-3x3.taquin";
-	//file = "niv2-3x3.taquin";
-	//file = "niv3-3x3.taquin";
-	//file = "niv4-4x4.taquin";
-	//file = "niv5-3x3.taquin";
-	//file = "niv6-5x5.taquin";
-	//file = "niv7-6x6.taquin";
-	//file = "niv8-3x3.taquin";
-	//file = "niv9-4x4.taquin"; //31ms
-	//file = "niv10-3x3.taquin";
-	//file = "niv11-5x5.taquin";
-	//file = "niv12-4x4.taquin";
-	file = "niv13-4x4.taquin";
+	//file = "../tests/niv1-3x3.taquin";
+	//file = "../tests/niv2-3x3.taquin";
+	//file = "../tests/niv3-3x3.taquin";
+	//file = "../tests/niv4-4x4.taquin";
+	//file = "../tests/niv5-3x3.taquin";
+	//file = "../tests/niv6-5x5.taquin";
+	//file = "../tests/niv7-6x6.taquin";
+	//file = "../tests/niv8-3x3.taquin";
+	file = "../tests/niv9-4x4.taquin"; //31ms
+	//file = "../tests/niv10-3x3.taquin";
+	//file = "../tests/niv11-5x5.taquin";
+	//file = "../tests/niv12-4x4.taquin";
+	//file = "../tests/niv13-4x4.taquin";
 	Parser p(file);
 	unsigned char * base = p.getInitialState();
 	if (base)
@@ -35,6 +35,11 @@ int		main(int ac, char** av)
 	//}
  // else
  //   {
- //     std::cerr << "Please select a map file" << std::endl;
+ //     std::cerr << "Please select a grid file and strategy" << std::endl 
+	//	<< "Usage :" << std::endl
+	//<< "taquin{.exe} Strategy Gridfile" << std::endl
+	//<< "Stategies :" << std::endl
+	//<< "1\tManhattan distance" << std::endl
+	//<< "2\tMisplaced tiles" << std::endl;
  //   }
 }
