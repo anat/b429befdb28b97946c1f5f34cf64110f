@@ -20,17 +20,17 @@ int		main(int ac, char** av)
 	//file = "niv7-6x6.taquin";
 	//file = "niv8-3x3.taquin";
 	//file = "niv9-4x4.taquin"; //31ms
-	file = "niv10-3x3.taquin";
+	//file = "niv10-3x3.taquin";
 	//file = "niv11-5x5.taquin";
 	//file = "niv12-4x4.taquin";
-	//file = "niv13-4x4.taquin";
+	file = "niv13-4x4.taquin";
 	Parser p(file);
 	unsigned char * base = p.getInitialState();
 	if (base)
 	{
-	Manhattan* strategy = new Manhattan();
-	AStar a(p.getSize(), p.getInitialState(), strategy);
-	a.run(file);
+		IHeuristic* strategy = new MisplacedTiles();
+		AStar a(p.getSize(), p.getInitialState(), strategy);
+		a.run(file);
 	}
 	//}
  // else

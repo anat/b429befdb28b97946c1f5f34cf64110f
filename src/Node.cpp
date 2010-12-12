@@ -9,6 +9,11 @@ Node::Node() : Parent(0)
 	this->F = 0;
 }
 
+Node::~Node()
+{
+	delete State;
+}
+
 // Constructor for other's nodes
 Node::Node(Node const &copy, TDirection dir)
 {

@@ -26,6 +26,7 @@ public:
 	TDirection Direction;
 	unsigned char Blank;
 	Node();
+	~Node();
 	Node(Node const &n, TDirection direction);
 	static bool Equals(Node *node1, Node *node2);
 	void setBlank();

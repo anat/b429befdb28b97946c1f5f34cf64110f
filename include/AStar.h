@@ -75,7 +75,6 @@ public:
 	int** fillMatrix();
 	void solutionFound(Node* n);
 	void findLowestInClosedList(Node * n, std::list<Node*>::iterator &);
-	int getClosedListCount();
 	void createNewNode(Node *parent, Node *newNode);
 	void showInfo();
 };
