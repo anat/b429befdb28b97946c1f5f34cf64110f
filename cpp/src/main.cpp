@@ -19,11 +19,23 @@ int		main(int ac, char** av)
 	//file = "../tests/niv6-5x5.taquin";
 	//file = "../tests/niv7-6x6.taquin";
 	//file = "../tests/niv8-3x3.taquin";
-	file = "../tests/niv9-4x4.taquin"; //31ms
+	//file = "../tests/niv9-4x4.taquin"; //31ms
 	//file = "../tests/niv10-3x3.taquin";
 	//file = "../tests/niv11-5x5.taquin";
 	//file = "../tests/niv12-4x4.taquin";
 	//file = "../tests/niv13-4x4.taquin";
+
+	//file = "../tests/2_6.tq";
+	//file = "../tests/3_6.tq";
+	//file = "../tests/3_13.tq";
+	//file = "../tests/3_21.tq";
+	//file = "../tests/4_.tq";		//*
+	//file = "../tests/4_31.tq";
+	//file = "../tests/5_.tq";		//*
+	//file = "../tests/16_1.tq";	//*
+	//file = "../tests/UNS_2.tq";
+	//file = "../tests/UNS_3.tq";
+
 	Parser p(file);
 	unsigned char * base = p.getInitialState();
 	if (base)
