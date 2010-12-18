@@ -6,38 +6,37 @@
 #include "taquin.h"
 #include "heuristic.h"
 #include "arguments.h"
+#include "lists.h"
 #include "alloc.h"
 #include "tools.h"
 
 extern t_tq_solver ts;
+extern t_th_mk threshold[];
+extern unsigned long th_ndx;
 
-t_args *get_arguments(int argc, char **argv)
+void get_arguments(t_args *args, int argc, char **argv)
 {
-  int (*hptr[])() = {dijkstra, manhattan};
-  char *in_f = NULL, *out_f = NULL;
-  t_args *p = NULL;
-  bool err = FALSE;
+  int (*hptr[])() = {zero, manhattan, misplaced, euclide, perso};
   int h = H_DEFAULT, i;
+  bool err = FALSE;
   
+  args->fast = 0;
+  args->input_file = NULL;
   for (i = 1; i < argc; i++)
     {
       if (!strcmp(argv[i], "-h") && argv[i+1])
 	h = atoi(argv[++i]);
-      else if (!strcmp(argv[i], "-o") && argv[i+1])
-	out_f = argv[++i];
+      else if (!strcmp(argv[i], "-f") && argv[i+1])
+	args->fast = atoi(argv[++i]);
       else if (argv[i][0] != '-')
-	in_f = argv[i];
+	args->input_file = argv[i];
       else
 	err = TRUE;
     }
-  if (!err && in_f && (h >= 0 && h <= 1))
-    {
-      p = xmalloc(sizeof(*p));
-      ts.heuristic = hptr[h];
-      p->input_file = in_f;
-      p->output_file = out_f;
-    }
-  return (p);
+  if (!err && args->input_file && (h >= H_MIN && h <= H_MAX))
+    ts.heuristic = hptr[h];
+  else
+    display_error(USAGE_MESSAGE);
 }
 
 void compute_final_state()
@@ -49,7 +48,7 @@ void compute_final_state()
     {
       ts.final_index[n] = i * ts.side_size + j;
       ts.final_state[(unsigned char)ts.final_index[n]] = n;
-      if (mov == 4) // RIGHT
+      if (mov == 4)
 	{
 	  if (j < ts.side_size - 1 - maxh)
 	    j++;
@@ -60,7 +59,7 @@ void compute_final_state()
 	      mov = 2;
 	    }
 	}
-      else if (mov == 2) // DOWN
+      else if (mov == 2)
 	{
 	  if (i < ts.side_size - 1 - maxv)
 	    i++;
@@ -71,7 +70,7 @@ void compute_final_state()
 	      mov = 3;
 	    }
 	}
-      else if (mov == 3) // LEFT
+      else if (mov == 3)
 	{
 	  if (j > 0 + minh)
 	    j--;
@@ -82,7 +81,7 @@ void compute_final_state()
 	      mov = 1;
 	    }
 	}
-      else // UP
+      else
 	{
 	  if (i > 0 + minv)
 	    i--;
@@ -118,7 +117,8 @@ t_node *get_init_state(char *in_f)
 	      /* Initialization */
 	      ts.grid_size = ts.side_size * ts.side_size;
 	      compute_final_state();
-	      n->grid = xmalloc(sizeof(*(n->grid)) * ts.grid_size);
+	      n->grid = alloc_grid();
+	      n->g = 0;
 	      while (buff[i] && buff[i] != '\n')
 		i++;
 	      if (!buff[i++])
@@ -152,4 +152,14 @@ t_node *get_init_state(char *in_f)
     }
   display_error(CANNOT_OPEN_FILE);
   return (NULL);
+}
+
+void set_mode(t_args *args)
+{
+  /* Set fast mode only if n-puzzle size is greater than 3*3 */
+  if (args->fast >= 1 && args->fast <= 4 && ts.side_size > 3)
+    {
+      threshold[0].mk = HT_MASK_FAST(args->fast);
+      th_ndx = args->fast;
+    }
 }

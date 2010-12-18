@@ -1,10 +1,11 @@
-# Makefile for Taquin
+# Makefile for N-puzzle (Taquin)
 
 NAME		=	taquin
 
 SRC		=	./src/main.c		\
 			./src/astar.c		\
 			./src/lists.c		\
+			./src/heap.c		\
 			./src/arguments.c	\
 			./src/heuristic.c	\
 			./src/display.c		\
@@ -19,14 +20,14 @@ CC		=	gcc
 
 INCLUDE		=	./include
 
-CFLAGS		+=	-W -Wall -I $(INCLUDE)
+CFLAGS		+=	-O3 -m32 -W -Wall -I $(INCLUDE)
 
 #
 
 all		:	$(NAME)
 
 $(NAME)		:	$(OBJ)
-			$(CC) $(OBJ) -o $(NAME)
+			$(CC) $(CFLAGS) $(OBJ) -l m -o $(NAME)
 
 clean		:
 			$(RM) ./src/*.o

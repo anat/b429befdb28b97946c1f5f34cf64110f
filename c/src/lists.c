@@ -1,94 +1,154 @@
 #include <stdlib.h>
 #include <string.h>
 #include "taquin.h"
-#include "time.h"
+#include "lists.h"
+#include "heap.h"
+#include "tools.h"
 
+#include <stdio.h>
+/* When a threshold is reached, hash table size is doubled */
+t_th_mk threshold[] =
+  {
+    {0, HT_MASK},
+    {1000000, (HT_MASK<<1)|1},
+    {3000000, (HT_MASK<<2)|3},
+    {6000000, (HT_MASK<<3)|7},
+    {13000000, (HT_MASK<<4)|15}
+  };
+
+unsigned long th_ndx; /* Index in the threshold table */
 extern t_tq_solver ts;
 
-/* Add a node to the sorted opened list. */
-void add_to_opened_list(t_node *node)
-{
-  t_node *list = ts.op_list;
-  t_node *prev = NULL;
+/*
+** This file does not contains linked list manipulating functions.
+** Hash tables and heap are used to represent Opened and Closed "lists".
+*/
 
+inline unsigned int hash(unsigned char *grid)
+{
+  unsigned int h = grid[0];
+  unsigned int i;
+
+  for (i = 1; i < ts.grid_size; i++)
+    h = ((h << 5) - h) + grid[i];
+  return (h & threshold[th_ndx].mk);
+}
+
+ /* Add node to the opened hash table and to the heap */
+inline void add_to_opened_list(t_node *node)
+{
+  unsigned int h = hash((unsigned char *) node->grid);
+
+  /* Add to opened hash table */
   ts.op_size++;
-  if (!ts.op_list)
-    ts.op_list = node;
-  else
+  if (ts.opened_ht[h])
+    node->next = ts.opened_ht[h];
+  ts.opened_ht[h] = node;
+  /* Add to the heap */
+  add_to_heap(node);
+}
+
+void update_ht_size(t_node ***ht)
+{
+  const unsigned long size = threshold[th_ndx].mk + 1;
+  t_node *list, *prev, *next;
+  unsigned int i;
+  unsigned int h;
+
+  *ht = xrealloc(*ht, size * sizeof(t_node *));
+  memset(*ht + (size >> 1), 0, (size >> 1) * sizeof(t_node *));
+  /* Replace every node */
+  for (i = 0; i < (size >> 1); i++)
     {
+      list = (*ht)[i];
+      prev = NULL;
       while (list)
 	{
-	  if (node->f < list->f)
+	  next = list->next;
+	  if ((h = hash((unsigned char *) list->grid)) != i)
 	    {
-	      node->next = list;
-	      if (!prev)
-		ts.op_list = node;
+	      list->next = ((*ht)[h]) ? (*ht)[h] : NULL;
+	      (*ht)[h] = list;
+	      if (prev)
+		prev->next = next;
 	      else
-		prev->next = node;
-	      return;
+		(*ht)[i] = next;
 	    }
-	  prev = list;
-	  list = list->next;
+	  else
+	    prev = list;
+	  list = next;
 	}
-      prev->next = node;
     }
 }
 
 /* Add a node to the closed list. */
-
 inline void add_to_closed_list(t_node *node)
 {
+  unsigned int h;
+
   ts.cl_size++;
-  //printf("\r          ");
-  //printf("%d", ts.cl_size);
-  //fflush(NULL);
-  node->next = ts.cl_list;
-  ts.cl_list = node;
+  /*
+  ** Realloc closed and opened hash tables when there is too much
+  ** elements (collisions) in the closed list. Most of the execution time,
+  ** there is more element in the opened list than in the closed list.
+  ** So when a threshold is reached by the closed hash table, we realloc it
+  ** and also realloc the opened hash table.
+  */
+  if (th_ndx < (sizeof(threshold) / sizeof(t_th_mk))
+      && ts.cl_size == threshold[th_ndx+1].th)
+    {
+      printf(" [threshold[%lu] reached] New HTs size is %lu.\n",
+	     th_ndx, threshold[th_ndx+1].mk+1);
+      th_ndx++;
+      update_ht_size(&ts.closed_ht);
+      update_ht_size(&ts.opened_ht);
+    }
+
+  /* Add the node */
+  h = hash((unsigned char *) node->grid);
+  if (ts.closed_ht[h])
+    node->next = ts.closed_ht[h];
+  ts.closed_ht[h] = node;
 }
 
-/* Get the best node from the opened list. */
-inline t_node *get_best_node()
+/* Get best node from heap and from opened hash table */
+t_node *get_best_node()
 {
-  t_node *tmp = ts.op_list;
+  t_node *best, *tmp, *prev;
+  unsigned int h;
 
-  if (ts.op_list)
+  if ((best = get_best_node_from_heap()))
     {
       ts.op_size--;
-      ts.op_list = ts.op_list->next;
-      tmp->next = NULL;
-    }
-  return (tmp);
-}
-
-static int counter = 1;
-/* Remove a node from the opened list. */
-void remove_this_node(t_node *node)
-{
-    //int counter = 0;
-    clock_t time = clock();
-  t_node *tmp = ts.op_list;
-  t_node *prev = NULL;
-counter = counter + 1;
-  while (tmp)
-    {
-      if (tmp == node)
+      h = hash((unsigned char *) best->grid);
+      tmp = ts.opened_ht[h];
+      if (tmp == best)
+	ts.opened_ht[h] = tmp->next;
+      else
 	{
-	  ts.op_size--;
-	  if (prev)
-	    prev->next = tmp->next;
-	  else
-	    ts.op_list = tmp->next;
-	  tmp->next = NULL;
-	  break;
+	  prev = tmp;
+	  while ((tmp = tmp->next))
+	    {
+	      if (tmp == best)
+		{
+		  prev->next = tmp->next;
+		  break;
+		}
+	      prev = tmp;
+	    }
 	}
-      prev = tmp;
-      tmp = tmp->next;
+      best->next = NULL;
     }
-   	printf ("Temps en secondes : %f\n", (clock() - time) / (double)CLOCKS_PER_SEC);
+  return (best);
 }
 
-inline t_node *is_in_list(t_node *list, char *grid)
+/* Check if node is in the opened hash table */
+inline t_node *is_in_op_list(char *grid)
 {
+  unsigned int h = hash((unsigned char *) grid);
+  t_node *list;
+
+  list = ts.opened_ht[h];
   while (list)
     {
       if (!memcmp(list->grid, grid, ts.grid_size))
@@ -98,15 +158,17 @@ inline t_node *is_in_list(t_node *list, char *grid)
   return (NULL);
 }
 
-void remove_list(t_node *list)
+inline t_node *is_in_cl_list(char *grid)
 {
-  t_node *back;
+  unsigned int h = hash((unsigned char *) grid);
+  t_node *list;
 
+  list = ts.closed_ht[h];
   while (list)
     {
-      back = list;
+      if (!memcmp(list->grid, grid, ts.grid_size))
+	return (list);
       list = list->next;
-      free(back->grid);
-      free(back);
     }
+  return (NULL);
 }

@@ -1,43 +1,43 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 #include "taquin.h"
 #include "lists.h"
 
 extern t_tq_solver ts;
 
-unsigned int display_path(char *out_f, t_node *final_state)
+void display_path(t_node *state)
 {
-  t_node *tmp = final_state;
-  unsigned int n = 0;
   unsigned int i;
 
-  (void) out_f;
-  tmp->c[0] = NULL;
-
-  /* Reverse links */
-  while (tmp->parent)
+  if (state)
     {
-      tmp->parent->c[0] = tmp;
-      tmp = tmp->parent;
-    }
-
-  /* Display */
-  while (tmp)
-    {
-      //printf(">> %d <<\n", tmp->h);
-      for (i = 0; i < ts.grid_size; i++)
+      state->next = NULL;
+      while (state->parent) /* Reverse links */
 	{
-	  if (!(i % ts.side_size))
-	    printf("\n");
-	  printf("%3d ", (unsigned char) tmp->grid[i]);
+	  state->parent->next = state;
+	  state = state->parent;
 	}
-      printf("\n");
-      //!char buff[2];read(0, buff, 2);
-      tmp = tmp->c[0];
-      n++;
-    }
+      
+      while (state) /* Display */
+	{
+	  for (i = 0; i < ts.grid_size; i++)
+	    {
+	      if (i && !(i % ts.side_size))
+		printf("\n");
+	      printf("%3d ", (unsigned char) state->grid[i]);
+	      if (i+1 == ts.side_size)
+		printf("  [ F=%d G=%d H=%d ]", state->f, state->g, state->h);
+	    }
+	  printf("\n\n");
 
-  //remove_list(ts.op_list);
-  //remove_list(ts.cl_list);
-  return (n-1); /* n is the number of node from A to B (included) */
+#ifdef STEP_MODE
+	  {
+	    char buff[2];
+	    read(0, buff, 1);
+	  }
+#endif
+	  state = state->next;
+	}
+    }
 }
