@@ -57,6 +57,7 @@ t_node *get_best_node_from_heap()
   if (ts.heap[1])
     {
       ts.heap[1] = ts.heap[--ts.hndx];
+      ts.heap[1]->ndx = 1;
       ts.heap[ts.hndx] = NULL;
       parent = 1;
       child1 = 2;
