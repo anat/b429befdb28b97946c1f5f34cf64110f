@@ -4,7 +4,9 @@
 #include <map>
 #include "Manhattan.h"
 #include "MisplacedTiles.h"
+#include "Euclide.h"
 
+unsigned char Node::Size;
 
 AStar::AStar(unsigned char size, unsigned char* initialState, IHeuristic * strategy) : 
 _matrixHelper(0),
@@ -21,7 +23,6 @@ _startTime(clock())
 	_heuristic->setSolution(_solution);
 	_initialState->H = _heuristic->getH(0, _initialState);
 	_initialState->F = _initialState->G + _initialState->H;
-	_initialState->show();
 }
 
 AStar::~AStar(void)
@@ -36,7 +37,7 @@ void AStar::run(char const * file)
 	getPossibleMove(_initialState);
 	_globalHashMap[(const char *)_initialState->State] = _initialState;
 
-	std::multimap<int, Node*>::iterator current;
+	std::multimap<double, Node*>::iterator current;
 
 	bool found = false;
 	while (1)
@@ -52,9 +53,7 @@ void AStar::run(char const * file)
 		}
 		getPossibleMove((*current).second);
 		_openList2.erase(current);
-		//Node* n = _globalHashMap[(const char *)current->second->State];
-		//_globalHashMap[(const char *)current->second->State] = 0;
-		//delete n;
+		showInfo();
 	}
 	if (found)
 		solutionFound((*current).second);
@@ -70,7 +69,8 @@ void AStar::createNewNode(Node * parent, Node * newNode)
 		newNode->Parent = parent;
 		newNode->H = _heuristic->getH(parent, newNode);
 		newNode->F = newNode->G + newNode->H;
-		_openList2.insert(std::pair<int, Node *>(newNode->F, newNode));
+
+		_openList2.insert(std::pair<double, Node *>(newNode->F, newNode));
 		_globalHashMap[(const char *)newNode->State] = newNode;
 	}
 	else
@@ -123,16 +123,14 @@ void AStar::solutionFound(Node* n)
 
 		ofs << "time=" << (double)_startTime / CLOCKS_PER_SEC <<  
 				"&moves=" << i  << 
-				"&complexity_in_time=" << 
-				"&complexity_in_size" << std::endl;
+				"&complexity_in_time=" << _globalHashMap.size() -  _openList2.size() <<
+				"&complexity_in_size=" << _globalHashMap.size() << std::endl;
 
 		std::list<const char *>::const_iterator it = solution.begin();
 		std::list<const char *>::const_iterator end = solution.end();
 
 		for (; it != end ; ++it)
-		{
 			ofs << (*it) << std::endl;
-		}
 		ofs.close();
 	}
 	if (n == 0)
@@ -169,11 +167,9 @@ Node* AStar::getSolution()
 
 int** AStar::fillMatrix()
 {
-	//alloc
 	int** matrix = new int*[_size];
 	for (int i = 0 ; i < _size ; i++)
 		matrix[i] = new int[_size];
-	//fill
 	for (int i = 0; i < _size ; i++)
 	{
 		for (int j = 0; j < _size ; j++) 
@@ -206,10 +202,10 @@ int AStar::getMatrixValue(int y, int x)
 
 void AStar::showInfo()
 {
-	if (_globalHashMap.size() % 50000 == 0)
+	if (_globalHashMap.size() % 100000 == 0)
 	{
 		std::cout << "Open List :" << _openList2.size() << std::endl;
 		std::cout << "Closed List : " << _globalHashMap.size() -  _openList2.size() << std::endl;
-		std::cout << "Temps courant : " << clock() - _startTime << std::endl;
+		std::cout << "Current time : " << clock() - _startTime << std::endl;
 	}
 }

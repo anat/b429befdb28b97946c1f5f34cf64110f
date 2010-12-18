@@ -4,19 +4,23 @@
 
 MisplacedTiles::MisplacedTiles()
 {
+	std::cout << "Strategy : Misplaced Tiles Heuristic" << std::endl;
 }
 
 MisplacedTiles::~MisplacedTiles(void)
 {
 }
 
-int MisplacedTiles::getH(Node * beforeState, Node* currentState)
+double MisplacedTiles::getH(Node * beforeState, Node* currentState)
 {
 	int cost = 0;
 	for (int i = 0 ; i < (_size * _size) ; i++)
 	{
-		if (this->_helper[currentState->State[i]].first != Node::getX(i) || this->_helper[currentState->State[i]].second !=  Node::getY(i))
-			cost++;
+		if (currentState->State[i] != BLANK)
+		{
+			if (this->_helper[currentState->State[i]].first != Node::getX(i) || this->_helper[currentState->State[i]].second !=  Node::getY(i))
+				cost += 1;
+		}
 	}
 	return cost;
 }

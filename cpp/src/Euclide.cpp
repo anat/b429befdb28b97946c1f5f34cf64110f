@@ -1,17 +1,18 @@
-#include "Manhattan.h"
+#include "Euclide.h"
 #include "Node.h"
 #include <iostream>
+#include <math.h>
 
-Manhattan::Manhattan()
+Euclide::Euclide()
 {
-	std::cout << "Strategy : Manhattan Heuristic" << std::endl;
+	std::cout << "Strategy : Euclide Heuristic" << std::endl;
 }
 
-Manhattan::~Manhattan(void)
+Euclide::~Euclide(void)
 {
 }
 
-double Manhattan::getH(Node * beforeState, Node* currentState)
+double Euclide::getH(Node * beforeState, Node* currentState)
 {
 	double cost = 0;
 	for (int i = 0 ; i < (_size * _size) ; i++)
@@ -22,14 +23,15 @@ double Manhattan::getH(Node * beforeState, Node* currentState)
 			int l = this->_helper[currentState->State[i]].second;
 			int x = Node::getX(i);
 			int y = Node::getY(i);
-			cost += (k > x ? k - x : x - k);
-			cost += (l > y ? l - y : y - l);
+			x = (k > x ? k - x : x - k);
+			y = (l > y ? l - y : y - l);
+			cost += ::sqrt(static_cast<double>((x*x) + (y*y)));
 		}
 	}
 	return cost;
 }
 
-void Manhattan::setSolution(Node *solution)
+void Euclide::setSolution(Node *solution)
 {
 	_size = Node::Size;
 	for (int i = 0 ; i < (Node::Size * Node::Size) ; i++)

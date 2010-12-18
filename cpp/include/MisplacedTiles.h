@@ -1,4 +1,6 @@
-#pragma once
+#ifndef		_MISPLACEDTILES_H_
+#define		_MISPLACEDTILES_H_
+
 #include "IHeuristic.h"
 #include <map>
 class MisplacedTiles : public IHeuristic
@@ -9,6 +11,8 @@ private:
 public:
 	MisplacedTiles();
 	~MisplacedTiles(void);
-	int getH(Node * beforeState, Node* currentState);
+	double getH(Node * beforeState, Node* currentState);
 	void setSolution(Node *solution);
 };
+
+#endif

@@ -7,7 +7,8 @@ private:
 	int _size;
 	std::map<int, std::pair<int, int> > _helper;
 public:
-	OutOf(Node * solution);
+	OutOf();
 	~OutOf(void);
-	int getH(Node * beforeState, Node* currentState);
+	double getH(Node * beforeState, Node* currentState);
+	void setSolution(Node *solution);
 };

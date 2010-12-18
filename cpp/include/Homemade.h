@@ -1,17 +1,17 @@
-#ifndef		_MANHATTAN_H_
-#define		_MANHATTAN_H_
+#ifndef		_HOMEMADE_H_
+#define		_HOMEMADE_H_
 
 #include "IHeuristic.h"
 #include <map>
 
-class Manhattan : public IHeuristic
+class Homemade : public IHeuristic
 {
 private:
 	char _size;
 	std::map<unsigned char, std::pair<unsigned char, unsigned char> > _helper;
 public:
-	Manhattan();
-	~Manhattan(void);
+	Homemade();
+	~Homemade(void);
 	double getH(Node * beforeState, Node* currentState);
 	void setSolution(Node *solution);
 };

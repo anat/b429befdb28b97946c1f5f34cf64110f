@@ -170,6 +170,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\Euclide.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\Homemade.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\main.cpp"
 				>
 			</File>
@@ -201,6 +209,14 @@
 			>
 			<File
 				RelativePath=".\include\AStar.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\Euclide.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\Homemade.h"
 				>
 			</File>
 			<File

@@ -1,19 +1,20 @@
-#include "Manhattan.h"
+#include "Homemade.h"
 #include "Node.h"
 #include <iostream>
 
-Manhattan::Manhattan()
+Homemade::Homemade()
 {
-	std::cout << "Strategy : Manhattan Heuristic" << std::endl;
+	std::cout << "Strategy : Homemade Heuristic" << std::endl;
 }
 
-Manhattan::~Manhattan(void)
+Homemade::~Homemade(void)
 {
 }
 
-double Manhattan::getH(Node * beforeState, Node* currentState)
+double Homemade::getH(Node * beforeState, Node* currentState)
 {
 	double cost = 0;
+	double tileCost;
 	for (int i = 0 ; i < (_size * _size) ; i++)
 	{
 		if (currentState->State[i] != BLANK)
@@ -22,14 +23,18 @@ double Manhattan::getH(Node * beforeState, Node* currentState)
 			int l = this->_helper[currentState->State[i]].second;
 			int x = Node::getX(i);
 			int y = Node::getY(i);
-			cost += (k > x ? k - x : x - k);
-			cost += (l > y ? l - y : y - l);
+			tileCost = (k > x ? k - x : x - k) + (l > y ? l - y : y - l);
+			double tmp = tileCost * tileCost; 
+
+			tmp = (tmp > 1) ? tmp / 2 : tmp;
+			cost += tmp;
 		}
 	}
+
 	return cost;
 }
 
-void Manhattan::setSolution(Node *solution)
+void Homemade::setSolution(Node *solution)
 {
 	_size = Node::Size;
 	for (int i = 0 ; i < (Node::Size * Node::Size) ; i++)

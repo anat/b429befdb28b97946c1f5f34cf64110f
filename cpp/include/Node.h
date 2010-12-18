@@ -20,9 +20,9 @@ public:
 	unsigned char* State;
 	static unsigned char Size;
 	Node* Parent;
-	int H;
+	double H;
 	int G;
-	int F;
+	double F;
 	TDirection Direction;
 	unsigned char Blank;
 	Node();
@@ -48,4 +48,5 @@ public:
 		return ((x * Size) + y);
 	}
 };
+
 #endif
